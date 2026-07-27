@@ -1,0 +1,56 @@
+{% block navbar %}
+<nav class="navbar navbar-expand-lg bg-body-tertiary border-bottom px-4 py-3 sticky-top z-1">
+  <div class="container-fluid px-0">
+    <button class="btn btn-outline-secondary d-md-none me-3 rounded-circle" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileMenu" style="width: 40px; height: 40px;">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <h5 class="mb-0 fw-bold d-none d-sm-block" id="topNavTitle">Dashboard</h5>
+
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <!--
+      <div class="input-group input-group-sm d-none d-md-flex me-2" style="max-width: 280px;">
+        <span class="input-group-text bg-body border-end-0 rounded-start-pill ps-3"><i class="bi bi-search text-muted"></i></span>
+        <input type="text" class="form-control bg-body border-start-0 rounded-end-pill py-2 shadow-none" placeholder="Global suchen (Strg+K)...">
+      </div>
+      -->
+
+      <!--
+      <div class="dropdown">
+        <button class="btn btn-primary shadow-sm rounded-pill px-3 py-2 d-flex align-items-center gap-2 fw-medium" data-bs-toggle="dropdown">
+          <i class="bi bi-plus-lg"></i> <span class="d-none d-sm-inline">Neu</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-2">
+          <li><a class="dropdown-item rounded-3 py-2" href="#"><i class="bi bi-check2-square me-2 text-primary"></i> Aufgabe</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="#"><i class="bi bi-calendar-event me-2 text-primary"></i> Termin</a></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="#"><i class="bi bi-journal-text me-2 text-primary"></i> Notiz</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item rounded-3 py-2" href="#"><i class="bi bi-egg-fried me-2 text-primary"></i> Rezept</a></li>
+        </ul>
+      </div>
+      -->
+
+      <div class="dropdown">
+        <button class="btn border-0 shadow-sm rounded-circle p-2 d-flex align-items-center justify-content-center" data-bs-toggle="dropdown" style="width: 40px; height: 40px;">
+          <i class="bi bi-palette-fill text-muted"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-4 p-3" style="min-width: auto;">
+          <li><h6 class="dropdown-header px-1 pb-2">Akzentfarbe</h6></li>
+          <li class="d-flex gap-2 px-1">
+            <div class="color-selector" style="background-color: #6366f1;" data-color="#6366f1" data-rgb="99, 102, 241" title="Indigo"></div>
+            <div class="color-selector" style="background-color: #10b981;" data-color="#10b981" data-rgb="16, 185, 129" title="Smaragd"></div>
+            <div class="color-selector" style="background-color: #f43f5e;" data-color="#f43f5e" data-rgb="244, 63, 94" title="Rose"></div>
+            <div class="color-selector" style="background-color: #f59e0b;" data-color="#f59e0b" data-rgb="245, 158, 11" title="Bernstein"></div>
+            <div class="color-selector" style="background-color: #8b5cf6;" data-color="#8b5cf6" data-rgb="139, 92, 246" title="Violett"></div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Dark Mode Toggle -->
+      <button class="btn border-0 shadow-sm rounded-circle p-2 d-flex align-items-center justify-content-center" id="themeToggle" style="width: 50px; height: 40px;">
+        <i class="bi bi-moon-stars-fill text-muted"></i>
+      </button>
+    </div>
+  </div>
+</nav>
+{% endblock %}

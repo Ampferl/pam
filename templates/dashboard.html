@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block dashboard %}
+{% include 'base/sidebar.html' %}
+<main class="flex-grow-1 overflow-x-hidden" style="height: 100vh; overflow-y: auto;">
+  {% include 'base/navbar.html' %}
+  <div class="container-fluid p-4 p-md-5">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+{% endblock %}

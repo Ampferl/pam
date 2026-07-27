@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life OS - Komplettes System</title>
+
+    <link href="{% static 'bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'bootstrap/icons/bootstrap-icons.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+    {% block headers %}{% endblock %}
+
+</head>
+<body class="bg-body">
+
+    <div id="app-container" class="d-flex">
+        {% block dashboard %}
+        {% endblock %}
+    </div>
+
+    {% block scripts %}{% endblock %}
+    <script src="{% static 'js/theme.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

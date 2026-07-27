@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block dashboard %}
+<main class="flex-grow-1 overflow-x-hidden" style="height: 100vh; overflow-y: auto;">
+  <div id="view-login" class="app-view vh-100 d-flex align-items-center justify-content-center">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+          <div class="card border-0 shadow-lg p-4 p-md-5">
+            <div class="text-center mb-4">
+              <div class="icon-box mb-3" style="width: 56px; height: 56px; border-radius: 16px; background: var(--bs-primary); color: white;">
+                <i class="bi bi-hexagon-fill fs-2"></i>
+              </div>
+              <h3 class="fw-bold tracking-tight">Willkommen</h3>
+            </div>
+            <form method="post" action="{% url 'account:login' %}">
+              {% csrf_token %}
+              {% if error %}
+              <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{error}}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+              {% endif %}
+
+              <div class="form-floating mb-3">
+                <input type="text" class="form-control rounded-4 shadow-none" id="username" name="username" placeholder="Username">
+                <label for="floatingInput">Username</label>
+              </div>
+              <div class="form-floating mb-4">
+                <input type="password" class="form-control rounded-4 shadow-none" id="password" name="password" placeholder="Password">
+                <label for="floatingPassword">Passwort</label>
+              </div>
+              <button class="btn btn-primary w-100 py-3 rounded-pill fw-bold shadow-sm" type="submit">Anmelden</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+{% endblock %}

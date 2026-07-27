@@ -1,0 +1,20 @@
+{% block sidebar %}
+<aside id="sidebar" class="bg-body-tertiary d-flex flex-column p-4 d-none d-md-flex z-1 sticky-top" style="height: 100vh;">
+  <a href="#" class="d-flex align-items-center mb-4 text-decoration-none text-body">
+    <div class="icon-box me-3" style="width: 40px; height: 40px; border-radius: 12px; background: var(--bs-primary); color: white;">
+      <i class="bi bi-hexagon-fill fs-4"></i>
+    </div>
+    <span class="fs-4 fw-bold tracking-tight">Life OS</span>
+  </a>
+  {% include 'base/links.html' %}
+</aside>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu" aria-labelledby="mobileMenuLabel">
+  <div class="offcanvas-header border-bottom">
+    <h5 class="offcanvas-title fw-bold" id="mobileMenuLabel">Life OS</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+  </div>
+  {% include 'base/links.html' %}
+</div>
+
+{% endblock %}

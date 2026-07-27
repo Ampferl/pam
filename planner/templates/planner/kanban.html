@@ -1,0 +1,66 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold tracking-tight mb-0">Aufgaben</h2>
+    <button class="btn btn-primary rounded-pill px-4"><i class="bi bi-plus"></i> Neue Aufgabe</button>
+  </div>
+  <div class="row g-4">
+    <!-- Kanban Column: To Do -->
+    <div class="col-12 col-md-4">
+      <div class="bg-body-tertiary rounded-4 p-3 h-100">
+        <h6 class="fw-bold mb-3 d-flex justify-content-between">
+          Zu Erledigen <span class="badge bg-secondary rounded-pill">3</span>
+        </h6>
+        <div class="card border-0 shadow-sm mb-3 card-hover cursor-pointer">
+          <div class="card-body p-3">
+            <span class="badge bg-primary-subtle text-primary mb-2">Arbeit</span>
+            <h6 class="fw-bold mb-1">Präsentation fertigstellen</h6>
+            <small class="text-muted"><i class="bi bi-calendar me-1"></i> Morgen</small>
+          </div>
+        </div>
+        <div class="card border-0 shadow-sm mb-3 card-hover cursor-pointer">
+          <div class="card-body p-3">
+            <span class="badge bg-info-subtle text-info mb-2">Privat</span>
+            <h6 class="fw-bold mb-1">Einkaufen für Wochenende</h6>
+            <small class="text-muted"><i class="bi bi-calendar me-1"></i> Heute</small>
+          </div>
+        </div>
+        <button class="btn btn-light w-100 text-muted border-dashed"><i class="bi bi-plus"></i> Aufgabe hinzufügen</button>
+      </div>
+    </div>
+
+    <!-- Kanban Column: In Progress -->
+    <div class="col-12 col-md-4">
+      <div class="bg-body-tertiary rounded-4 p-3 h-100">
+        <h6 class="fw-bold mb-3 d-flex justify-content-between">
+          In Bearbeitung <span class="badge bg-warning rounded-pill">1</span>
+        </h6>
+        <div class="card border-0 shadow-sm mb-3 card-hover cursor-pointer border-start border-warning border-4">
+          <div class="card-body p-3">
+            <span class="badge bg-primary-subtle text-primary mb-2">Arbeit</span>
+            <h6 class="fw-bold mb-1">Django API Endpoints</h6>
+            <div class="progress mt-2" style="height: 6px;">
+              <div class="progress-bar bg-warning" style="width: 65%"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kanban Column: Done -->
+    <div class="col-12 col-md-4">
+      <div class="bg-body-tertiary rounded-4 p-3 h-100">
+        <h6 class="fw-bold mb-3 d-flex justify-content-between">
+          Erledigt <span class="badge bg-success rounded-pill">2</span>
+        </h6>
+        <div class="card border-0 shadow-sm mb-3 opacity-75">
+          <div class="card-body p-3 text-decoration-line-through text-muted">
+            <h6 class="fw-bold mb-1">Meeting mit Design-Team</h6>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

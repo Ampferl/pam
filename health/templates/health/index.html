@@ -1,0 +1,160 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div>
+  <h2 class="fw-bold tracking-tight mb-4">Aktivitäts-Übersicht</h2>
+
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-lg-8">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h6 class="fw-bold text-muted mb-4">Produktivität & Habits (Letzte 7 Tage)</h6>
+          <!-- Chart Canvas -->
+          <canvas id="activityChart" height="100"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm h-100 bg-body-tertiary">
+        <div class="card-body p-4">
+          <h6 class="fw-bold mb-4">Zusammenfassung</h6>
+
+          <div class="mb-4">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="small fw-medium">Aufgaben Erledigt</span>
+              <span class="small fw-bold">85%</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar bg-primary" style="width: 85%"></div>
+            </div>
+          </div>
+
+          <div class="mb-4">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="small fw-medium">Workout Konsistenz</span>
+              <span class="small fw-bold">100%</span>
+            </div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar bg-success" style="width: 100%"></div>
+            </div>
+          </div>
+
+          <div class="alert alert-primary bg-primary-subtle border-0 rounded-4 mt-auto mb-0">
+            <i class="bi bi-stars me-2"></i> Du bist diese Woche <strong>20% produktiver</strong> als letzte Woche! Weiter so!
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold tracking-tight mb-0">Trainingsplan</h2>
+    <button class="btn btn-primary rounded-pill px-4"><i class="bi bi-play-fill"></i> Workout starten</button>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-8">
+      <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4">Wochenübersicht (Hypertrophie Phase 2)</h5>
+          <div class="d-flex flex-column gap-3">
+            <div class="d-flex align-items-center p-3 rounded-4 border bg-success bg-opacity-10 border-success">
+              <div class="icon-box bg-success text-white me-3"><i class="bi bi-check-lg"></i></div>
+              <div class="flex-grow-1">
+                <h6 class="mb-0 fw-bold">Montag: Push (Brust, Schulter, Trizeps)</h6>
+                <small class="text-muted">Absolviert in 55 Min.</small>
+              </div>
+            </div>
+            <div class="d-flex align-items-center p-3 rounded-4 border bg-body-tertiary">
+              <div class="icon-box bg-secondary text-white me-3"><i class="bi bi-arrow-right"></i></div>
+              <div class="flex-grow-1">
+                <h6 class="mb-0 fw-bold">Mittwoch: Pull (Rücken, Bizeps)</h6>
+                <small class="text-primary fw-medium">Heute fällig</small>
+              </div>
+              <button class="btn btn-sm btn-outline-primary rounded-pill">Starten</button>
+            </div>
+            <div class="d-flex align-items-center p-3 rounded-4 border border-dashed">
+              <div class="icon-box bg-light text-muted me-3"><i class="bi bi-lock"></i></div>
+              <div class="flex-grow-1">
+                <h6 class="mb-0 text-muted">Freitag: Legs & Core</h6>
+                <small class="text-muted">Geplant</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm bg-body-tertiary h-100">
+        <div class="card-body p-4">
+          <h6 class="fw-bold mb-4">Körperdatenbank</h6>
+          <ul class="list-group list-group-flush bg-transparent">
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+              Gewicht <span class="fw-bold">82.5 kg</span>
+            </li>
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+              KFA <span class="fw-bold">14%</span>
+            </li>
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+              Bankdrücken (1RM) <span class="fw-bold">100 kg</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+  function initChart() {
+    if(window.myChart) return;
+    const ctx = document.getElementById('activityChart').getContext('2d');
+
+    // Hole aktuelle Farben
+    const theme = htmlElement.getAttribute('data-bs-theme');
+    const textColor = theme === 'dark' ? '#94a3b8' : '#64748b';
+    const gridColor = theme === 'dark' ? '#334155' : '#e2e8f0';
+
+    // Aktuelle Akzentfarbe
+    const primRgb = localStorage.getItem('accentColorRgb') || '99, 102, 241';
+    const primHex = localStorage.getItem('accentColorHex') || '#6366f1';
+
+    window.myChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+        datasets: [{
+          label: 'Productivity Score',
+          data: [65, 78, 90, 81, 86, 55, 40],
+          backgroundColor: `rgba(${primRgb}, 0.15)`,
+          borderColor: primHex,
+          borderWidth: 3,
+          pointBackgroundColor: primHex,
+          pointRadius: 4,
+          fill: true,
+          tension: 0.4 // Abgerundete Kurve
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { grid: { color: gridColor }, ticks: { color: textColor } },
+          x: { grid: { display: false }, ticks: { color: textColor } }
+        }
+      }
+    });
+  }
+
+  function updateChartTheme(theme) {
+    const textColor = theme === 'dark' ? '#94a3b8' : '#64748b';
+    const gridColor = theme === 'dark' ? '#334155' : '#e2e8f0';
+    window.myChart.options.scales.y.grid.color = gridColor;
+    window.myChart.options.scales.y.ticks.color = textColor;
+    window.myChart.options.scales.x.ticks.color = textColor;
+    window.myChart.update();
+  }
+</script>
+{% endblock%}

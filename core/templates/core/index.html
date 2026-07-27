@@ -1,0 +1,91 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div>
+  <h2 class="mb-5 fw-bold tracking-tight">Willkommen zurück! 👋</h2>
+  <div class="row g-4 mb-4">
+    <!-- Stat Cards -->
+    <div class="col-6 col-md-3">
+      <div class="card bg-body-tertiary border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="text-muted mb-2">Offene Aufgaben</h6>
+          <h3 class="fw-bold mb-0">12</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-body-tertiary border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="text-muted mb-2">Events diese Woche</h6>
+          <h3 class="fw-bold mb-0">5</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-body-tertiary border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="text-muted mb-2">Trainings absolviert</h6>
+          <h3 class="fw-bold mb-0 text-success">3/4</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card bg-body-tertiary border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="text-muted mb-2">Wasser (Heute)</h6>
+          <h3 class="fw-bold mb-0 text-primary">1.5L</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row g-4">
+    <div class="col-12 col-xl-4">
+      <div class="card h-100">
+        <div class="card-body p-4">
+          <h6 class="fw-bold text-muted mb-4"><i class="bi bi-check2-circle me-2"></i> HEUTIGE AUFGABEN</h6>
+          <div class="d-flex align-items-center mb-3 p-2 rounded-3 bg-body-tertiary">
+            <input class="form-check-input me-3 ms-2 fs-5 shadow-none" type="checkbox" checked>
+            <label class="form-check-label flex-grow-1 text-decoration-line-through text-muted">Emails beantworten</label>
+          </div>
+          <div class="d-flex align-items-center mb-3 p-2 rounded-3">
+            <input class="form-check-input me-3 ms-2 fs-5 shadow-none" type="checkbox">
+            <label class="form-check-label flex-grow-1 fw-medium">Budget prüfen</label>
+            <span class="badge bg-danger-subtle text-danger rounded-pill">High</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-4">
+      <div class="card h-100 bg-primary text-white" style="background: linear-gradient(135deg, var(--bs-primary), rgba(var(--bs-primary-rgb), 0.8));">
+        <div class="card-body p-4">
+          <h6 class="fw-bold text-white-50 mb-4"><i class="bi bi-arrow-repeat me-2"></i> HABIT TRACKER</h6>
+          <div class="bg-white bg-opacity-10 rounded-4 p-3 mb-3 d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-book me-2"></i> Lesen (30 Min)</span>
+            <i class="bi bi-check-circle-fill fs-4 text-white"></i>
+          </div>
+          <div class="bg-white bg-opacity-10 rounded-4 p-3 mb-3 d-flex justify-content-between align-items-center">
+            <span><i class="bi bi-yin-yang me-2"></i> Meditation</span>
+            <i class="bi bi-circle fs-4 text-white-50"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-xl-4">
+      <div class="card h-100">
+        <div class="card-body p-4">
+          <h6 class="fw-bold text-muted mb-4"><i class="bi bi-calendar3 me-2"></i> NÄCHSTE TERMINE</h6>
+          <div class="d-flex align-items-center p-3 mb-3 rounded-4 border bg-body-tertiary">
+            <div class="text-center px-3 border-end me-3">
+              <div class="fs-5 fw-bold text-primary">14</div>
+              <div class="text-muted small fw-bold">OKT</div>
+            </div>
+            <div>
+              <h6 class="mb-1 fw-bold">Team Sync</h6>
+              <p class="mb-0 text-muted small">14:00 - 15:00 Uhr</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "dashboard.html" %}
+{% block content %}
+<div class="h-100">
+  <h2 class="fw-bold tracking-tight mb-4">Notizen</h2>
+  <div class="row g-4 h-100" style="min-height: 600px;">
+    <!-- Note List -->
+    <div class="col-12 col-md-4 col-lg-3">
+      <div class="card border-0 shadow-sm h-100 bg-body-tertiary">
+        <div class="p-3 border-bottom">
+          <button class="btn btn-primary w-100 rounded-pill"><i class="bi bi-plus"></i> Neue Notiz</button>
+        </div>
+        <div class="list-group list-group-flush overflow-auto rounded-bottom-4">
+          <a href="#" class="list-group-item list-group-item-action bg-body border-start border-primary border-4 py-3 active-note">
+            <h6 class="mb-1 fw-bold">Projektideen 2027</h6>
+            <small class="text-muted">Gestern, 14:30</small>
+          </a>
+          <a href="#" class="list-group-item list-group-item-action bg-transparent py-3">
+            <h6 class="mb-1 fw-medium">Buchzusammenfassung</h6>
+            <small class="text-muted">12. Okt 2026</small>
+          </a>
+        </div>
+      </div>
+    </div>
+    <!-- Note Editor -->
+    <div class="col-12 col-md-8 col-lg-9">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-header bg-transparent border-bottom-0 pt-4 pb-0 px-4">
+          <input type="text" class="form-control form-control-lg border-0 shadow-none fs-3 fw-bold px-0 bg-transparent" value="Projektideen 2027">
+          <div class="d-flex gap-2 text-muted small mt-2">
+            <span><i class="bi bi-folder"></i> Ideen</span>
+            <span><i class="bi bi-clock"></i> Zuletzt bearbeitet: Gestern</span>
+          </div>
+        </div>
+        <div class="card-body p-4 d-flex flex-column">
+          <!-- Toolbar -->
+          <div class="bg-body-tertiary rounded-3 p-2 mb-3 d-flex gap-2">
+            <button class="btn btn-sm btn-light fw-bold">B</button>
+            <button class="btn btn-sm btn-light fst-italic">I</button>
+            <button class="btn btn-sm btn-light text-decoration-underline">U</button>
+            <div class="vr mx-1"></div>
+            <button class="btn btn-sm btn-light"><i class="bi bi-list-ul"></i></button>
+            <button class="btn btn-sm btn-light"><i class="bi bi-link"></i></button>
+          </div>
+          <textarea class="form-control border-0 shadow-none flex-grow-1 resize-none bg-transparent" placeholder="Schreibe deine Gedanken auf...">- AI basierter Habit Tracker&#10;- Automatisiertes Budget-Tool mit Bank API&#10;- ...</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
