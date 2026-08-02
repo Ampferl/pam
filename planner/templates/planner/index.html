@@ -1,34 +1,43 @@
 {% extends "dashboard.html" %}
 {% load static %}
+
 {% block content %}
-<!-- 3. CALENDAR -->
 <div id="view-calendar" class="spa-view">
+
+    <div class="d-flex align-items-center mb-2">
+      <h3 class="fw-bold fs-4 fs-md-3">
+        {% if active_view == 'month' %}{{ month_title }}{% endif %}
+        {% if active_view == 'week' %}{{ week_title }}{% endif %}
+        {% if active_view == 'day' %}{{ day_title }}{% endif %}
+      </h3>
+    </div>
   <div class="d-flex justify-content-between align-items-center mb-3 mb-md-4">
-    <h3 class="fw-bold mb-0 fs-4 fs-md-3">Juli 2026</h3>
-
-    <div class="btn-group bg-body-tertiary p-1 rounded-pill d-none d-md-flex" role="group">
-      <input type="radio" class="btn-check" name="calView" id="btnMonat" checked onchange="switchCalendarView('month')">
-      <label class="btn btn-sm btn-outline-primary border-0 rounded-pill px-4" for="btnMonat">Monat</label>
-
-      <input type="radio" class="btn-check" name="calView" id="btnWoche" onchange="switchCalendarView('week')">
-      <label class="btn btn-sm btn-outline-primary border-0 rounded-pill px-4" for="btnWoche">Woche</label>
-
-      <input type="radio" class="btn-check" name="calView" id="btnTag" onchange="switchCalendarView('day')">
-      <label class="btn btn-sm btn-outline-primary border-0 rounded-pill px-4" for="btnTag">Tag</label>
+    <div class="btn-group bg-body-tertiary p-1 rounded-pill d-none d-md-flex">
+      <a href="?date={{ target_date }}&view=month" class="btn btn-sm border-0 rounded-pill px-4 {% if active_view == 'month' %}btn-primary{% else %}btn-outline-primary text-body{% endif %}">Monat</a>
+      <a href="?date={{ target_date }}&view=week" class="btn btn-sm border-0 rounded-pill px-4 {% if active_view == 'week' %}btn-primary{% else %}btn-outline-primary text-body{% endif %}">Woche</a>
+      <a href="?date={{ target_date }}&view=day" class="btn btn-sm border-0 rounded-pill px-4 {% if active_view == 'day' %}btn-primary{% else %}btn-outline-primary text-body{% endif %}">Tag</a>
     </div>
 
-    <!-- Mobile View Selector Dropdown -->
+    <div class="d-flex align-items-center gap-3">
+      <div class="btn-group">
+        <a href="?date={{ prev_date }}&view={{ active_view }}" class="btn btn-outline-secondary btn-sm rounded-start-pill px-3">
+          <i class="bi bi-chevron-left"></i>
+        </a>
+        <a href="?date={% now 'Y-m-d' %}&view={{ active_view }}" class="btn btn-outline-secondary btn-sm px-3 fw-bold">Heute</a>
+        <a href="?date={{ next_date }}&view={{ active_view }}" class="btn btn-outline-secondary btn-sm rounded-end-pill px-3">
+          <i class="bi bi-chevron-right"></i>
+        </a>
+      </div>
+    </div>
+
     <div class="dropdown d-md-none">
-      <button class="btn btn-outline-primary btn-sm rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-        Ansicht
-      </button>
+      <button class="btn btn-outline-primary btn-sm rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown">Ansicht</button>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item" href="#" onclick="switchCalendarView('month'); document.getElementById('btnMonat').checked = true;">Monat</a></li>
-        <li><a class="dropdown-item" href="#" onclick="switchCalendarView('week'); document.getElementById('btnWoche').checked = true;">Woche</a></li>
-        <li><a class="dropdown-item" href="#" onclick="switchCalendarView('day'); document.getElementById('btnTag').checked = true;">Tag</a></li>
+        <li><a class="dropdown-item {% if active_view == 'month' %}active{% endif %}" href="?date={{ target_date }}&view=month">Monat</a></li>
+        <li><a class="dropdown-item {% if active_view == 'week' %}active{% endif %}" href="?date={{ target_date }}&view=week">Woche</a></li>
+        <li><a class="dropdown-item {% if active_view == 'day' %}active{% endif %}" href="?date={{ target_date }}&view=day">Tag</a></li>
       </ul>
     </div>
-
 
     <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#eventModal">
       <i class="bi bi-calendar-plus me-2"></i>
@@ -37,94 +46,153 @@
 
   <div class="card p-2 p-md-4 overflow-hidden">
 
-    <!-- MONTH VIEW -->
-    <div id="cal-view-month" class="d-block">
+    <div id="cal-view-month" class="{% if active_view == 'month' %}d-block{% else %}d-none{% endif %}">
       <div class="calendar-grid text-center fw-bold text-muted mb-1 mb-md-2 small">
         <div>MO</div><div>DI</div><div>MI</div><div>DO</div><div>FR</div><div>SA</div><div>SO</div>
       </div>
       <div class="calendar-grid">
-        <div class="calendar-day text-muted opacity-50">29</div><div class="calendar-day text-muted opacity-50">30</div>
-        <div class="calendar-day">1</div><div class="calendar-day">2</div><div class="calendar-day">3<div class="cal-event">Marathon Prep</div></div>
-        <div class="calendar-day text-primary fw-bold border-primary bg-primary bg-opacity-10">4<div class="cal-event bg-danger text-white">Project</div></div>
-        <div class="calendar-day">5</div>
-        <div class="calendar-day">6</div><div class="calendar-day">7</div><div class="calendar-day">8</div><div class="calendar-day">9<div class="cal-event bg-warning text-dark">Flight</div></div><div class="calendar-day">10</div><div class="calendar-day">11</div><div class="calendar-day">12</div>
+        {% for day_data in calendar_month_grid %}
+          <!-- Changed back to a <div> so events can be clicked independently -->
+          <div class="calendar-day 
+            {% if not day_data.is_current_month %}text-muted opacity-50{% else %}text-body{% endif %} 
+            {% if day_data.is_today %}fw-bold border-primary bg-primary bg-opacity-10{% endif %}">
+            
+            <!-- The link to the Day view is now ONLY on the number itself -->
+            <a href="?date={{ day_data.date|date:'Y-m-d' }}&view=day" 
+               class="text-decoration-none d-block mb-1 {% if day_data.is_today %}text-primary{% else %}text-reset{% endif %}">
+              {{ day_data.date.day }}
+            </a>
+            
+            {% for event in day_data.events %}
+              <!-- The Event Div (Triggers Modal) -->
+              <div class="cal-event mt-1 px-1 rounded text-truncate small" 
+                   style="background-color: {{ event.obj.category.color_hex|default:'#0d6efd' }}; color: #fff; cursor: pointer;"
+                   
+                   data-bs-toggle="modal" 
+                   data-bs-target="#editEventModal"
+                   
+                   data-id="{{ event.obj.id }}"
+                   data-title="{{ event.obj.title }}"
+                   data-startdate="{{ event.obj.start_time|date:'Y-m-d' }}"
+                   data-starttime="{{ event.obj.start_time|time:'H:i' }}"
+                   data-enddate="{{ event.obj.end_time|date:'Y-m-d' }}"
+                   data-endtime="{{ event.obj.end_time|time:'H:i' }}"
+                   data-category="{{ event.obj.category.id|default:'' }}"
+                   data-description="{{ event.obj.description|default:'' }}">
+                
+                {{ event.obj.start_time|date:"H:i" }} {{ event.obj.title }}
+              </div>
+            {% endfor %}
+            
+          </div>
+        {% endfor %}
       </div>
     </div>
 
-    <!-- WEEK VIEW -->
-    <div id="cal-view-week" class="d-none overflow-x-auto pb-2">
+    <div id="cal-view-week" class="{% if active_view == 'week' %}d-block{% else %}d-none{% endif %} overflow-x-auto pb-2">
       <div class="min-w-600px">
-        <!-- Header row -->
+
         <div class="d-flex text-center fw-bold text-muted mb-2 small align-items-end pb-2">
-          <div class="w-50px"></div> <!-- corner space -->
-          <div class="flex-grow-1">MO <br><span class="fs-4 text-body">29</span></div>
-          <div class="flex-grow-1">DI <br><span class="fs-4 text-body">30</span></div>
-          <div class="flex-grow-1">MI <br><span class="fs-4 text-body">1</span></div>
-          <div class="flex-grow-1">DO <br><span class="fs-4 text-body">2</span></div>
-          <div class="flex-grow-1">FR <br><span class="fs-4 text-body">3</span></div>
-          <div class="flex-grow-1 text-primary">SA <br><span class="fs-4">4</span></div>
-          <div class="flex-grow-1">SO <br><span class="fs-4 text-body">5</span></div>
+          <div class="w-50px"></div>
+          {% for day_data in calendar_week_grid %}
+            <a href="?date={{ day_data.date|date:'Y-m-d' }}&view=day" class="flex-grow-1 text-decoration-none {% if day_data.is_today %}text-primary{% else %}text-muted{% endif %}">
+              {{ day_data.date|date:"D"|upper }} <br>
+              <span class="fs-4 {% if not day_data.is_today %}text-body{% endif %}">{{ day_data.date.day }}</span>
+            </a>
+          {% endfor %}
         </div>
-        <!-- Grid Body -->
+
         <div class="d-flex position-relative border-top border-secondary-subtle">
-          <!-- Time Labels (Y-Axis) -->
-          <!--
-          <div class="text-end pe-2 text-muted small pt-2 w-50px border-end border-secondary-subtle">
-            <div class="cal-time-slot">08:00</div><div class="cal-time-slot">09:00</div><div class="cal-time-slot">10:00</div>
-            <div class="cal-time-slot">11:00</div><div class="cal-time-slot">12:00</div><div class="cal-time-slot">13:00</div>
-            <div class="cal-time-slot">14:00</div><div class="cal-time-slot">15:00</div>
-          </div>
-          -->
-          <div class="text-end pe-2 text-muted small pt-2 w-50px border-end border-secondary-subtle">
+          <div class="text-end pe-2 text-muted small pt-2 w-50px border-end border-secondary-subtle" style="position: relative;">
             {% for i in "x"|rjust:"24" %}
-            <div class="cal-time-slot">{{forloop.counter|add:"-1"|stringformat:"02d"}}:00</div>
+              <div class="cal-time-slot" style="height: 60px;">{{ forloop.counter|add:"-1"|stringformat:"02d" }}:00</div>
             {% endfor %}
           </div>
 
-          <!-- Day Columns (flex grid) -->
-          <div class="flex-grow-1 border-end border-secondary-subtle position-relative"><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div></div>
-          <div class="flex-grow-1 border-end border-secondary-subtle position-relative"><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div></div>
-          <!-- Wednesday -->
-          <div class="flex-grow-1 border-end border-secondary-subtle position-relative">
-            <div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div>
-            <!-- Event directly inside the day column! Top defines start time, height defines duration. -->
-            <div class="cal-event-abs mock-event-1">Team Sync</div>
-          </div>
-          <div class="flex-grow-1 border-end border-secondary-subtle position-relative"><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div></div>
-          <div class="flex-grow-1 border-end border-secondary-subtle position-relative"><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div></div>
-          <!-- Saturday (Heute) -->
-          <div class="flex-grow-1 border-end border-secondary-subtle position-relative bg-primary bg-opacity-10">
-            <div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div>
-            <div class="cal-event-abs mock-event-2 bg-danger bg-opacity-25 text-danger border-danger">Project Deadline</div>
-          </div>
-          <div class="flex-grow-1 position-relative"><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div></div>
+          {% for day_data in calendar_week_grid %}
+            <div class="cal-day-column flex-grow-1 border-end border-secondary-subtle position-relative {% if day_data.is_today %}bg-primary bg-opacity-10{% endif %}" data-date="{{ day_data.date|date:'Y-m-d' }}">
+              {% if day_data.is_today %}
+                <div class="current-time-line position-absolute w-100" style="z-index: 20; display: none;">
+                  <div class="position-relative">
+                    <div class="border-top border-danger border-2 position-absolute w-100" style="top: 0;"></div>
+                    <div class="bg-danger rounded-circle position-absolute" style="width: 10px; height: 10px; left: -5px; top: -4px;"></div>
+                  </div>
+                </div>
+              {% endif %}
+
+              {% for i in "x"|rjust:"24" %}
+                <div class="cal-grid-line border-bottom border-secondary-subtle" style="height: 60px;"></div>
+              {% endfor %}
+
+              {% for event in day_data.events %}
+                <div class="cal-event-abs position-absolute w-100 rounded p-1 text-white overflow-hidden shadow-sm" 
+                     style="top: {{ event.top_px }}px; height: {{ event.height_px }}px; background-color: {{ event.obj.category.color_hex|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
+                     data-bs-toggle="modal" 
+                     data-bs-target="#editEventModal"
+
+                     data-id="{{ event.obj.id }}"
+                     data-title="{{ event.obj.title }}"
+                     data-startdate="{{ event.obj.start_time|date:'Y-m-d' }}"
+                     data-starttime="{{ event.obj.start_time|time:'H:i' }}"
+                     data-enddate="{{ event.obj.end_time|date:'Y-m-d' }}"
+                     data-endtime="{{ event.obj.end_time|time:'H:i' }}"
+                     data-category="{{ event.obj.category.id|default:'' }}"
+                     data-description="{{ event.obj.description|default:'' }}">
+                  <div class="resize-handle resize-handle-top position-absolute w-100" style="top: 0; left: 0; height: 8px; cursor: ns-resize; z-index: 20;"></div>
+                  <strong class="d-block small lh-1">{{ event.obj.title }}</strong>
+                  <span class="small pointer-events-none time-label">{{ event.obj.start_time|date:"H:i" }}</span>
+                  <div class="resize-handle resize-handle-bottom position-absolute w-100" style="bottom: 0; left: 0; height: 8px; cursor: ns-resize; z-index: 20;"></div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endfor %}
         </div>
       </div>
     </div>
 
-    <!-- DAY VIEW -->
-    <div id="cal-view-day" class="d-none">
-      <div class="d-flex text-center fw-bold text-muted mb-2 small align-items-end pb-2">
-        <div class="w-50px"></div>
-        <div class="flex-grow-1 text-primary">Samstag, 4. Juli</div>
-      </div>
-      <div class="d-flex position-relative border-top border-secondary-subtle">
+    <div id="cal-view-day" class="{% if active_view == 'day' %}d-block{% else %}d-none{% endif %}">
+      <div class="d-flex position-relative border-top border-secondary-subtle mt-3">
         <div class="text-end pe-2 text-muted small pt-2 w-50px border-end border-secondary-subtle">
-            {% for i in "x"|rjust:"24" %}
-            <div class="cal-time-slot">{{forloop.counter|add:"-1"|stringformat:"02d"}}:00</div>
-            {% endfor %}
+          {% for i in "x"|rjust:"24" %}
+            <div class="cal-time-slot" style="height: 60px;">{{ forloop.counter|add:"-1"|stringformat:"02d" }}:00</div>
+          {% endfor %}
         </div>
-        <div class="flex-grow-1 position-relative bg-primary bg-opacity-10">
-          <!-- Background grid lines -->
-          <div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div>
-          <div class="cal-grid-line"></div><div class="cal-grid-line"></div><div class="cal-grid-line"></div>
-          <div class="cal-grid-line"></div><div class="cal-grid-line"></div>
 
-          <!-- Absolute positioned event (no left/width needed!) -->
-          <div class="cal-event-abs mock-event-2 bg-danger bg-opacity-25 text-danger border-danger">
-            <strong>Project Deadline</strong><br>
-            <span class="small fw-normal">Meeting Room B</span>
-          </div>
+        <div class="cal-day-column flex-grow-1 position-relative {% if target_day_is_today %}bg-primary bg-opacity-10{% endif %}" data-date="{{ target_date }}">
+          {% if target_day_is_today %}
+            <div class="current-time-line position-absolute w-100" style="z-index: 20; display: none;">
+              <div class="position-relative">
+                <div class="border-top border-danger border-2 position-absolute w-100" style="top: 0;"></div>
+                <div class="bg-danger rounded-circle position-absolute" style="width: 10px; height: 10px; left: -5px; top: -4px;"></div>
+              </div>
+            </div>
+          {% endif %}
+
+          {% for i in "x"|rjust:"24" %}
+            <div class="cal-grid-line border-bottom border-secondary-subtle" style="height: 60px;"></div>
+          {% endfor %}
+
+          {% for event in day_events %}
+            <div class="cal-event-abs position-absolute w-100 rounded p-2 text-white overflow-hidden shadow-sm" 
+                 style="top: {{ event.top_px }}px; height: {{ event.height_px }}px; background-color: {{ event.obj.category.color_hex|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
+                 data-bs-toggle="modal" 
+                 data-bs-target="#editEventModal"
+
+                 data-id="{{ event.obj.id }}"
+                 data-title="{{ event.obj.title }}"
+                 data-startdate="{{ event.obj.start_time|date:'Y-m-d' }}"
+                 data-starttime="{{ event.obj.start_time|time:'H:i' }}"
+                 data-enddate="{{ event.obj.end_time|date:'Y-m-d' }}"
+                 data-endtime="{{ event.obj.end_time|time:'H:i' }}"
+                 data-category="{{ event.obj.category.id|default:'' }}"
+                 data-description="{{ event.obj.description|default:'' }}">
+              <div class="resize-handle resize-handle-top position-absolute w-100" style="top: 0; left: 0; height: 8px; cursor: ns-resize; z-index: 20;"></div>
+              <strong class="d-block">{{ event.obj.title }}</strong>
+              <span class="small pointer-events-none time-label">{{ event.obj.start_time|date:"H:i" }} - {{ event.obj.end_time|date:"H:i" }}</span><br>
+              <span class="small opacity-75">{{ event.obj.description }}</span>
+              <div class="resize-handle resize-handle-bottom position-absolute w-100" style="bottom: 0; left: 0; height: 8px; cursor: ns-resize; z-index: 20;"></div>
+            </div>
+          {% endfor %}
         </div>
       </div>
     </div>
@@ -132,69 +200,129 @@
   </div>
 </div>
 
-
-
 <div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg">
 
-      <!-- Header -->
       <div class="modal-header border-bottom-0 pb-0">
-        <h1 class="modal-title fs-4 fw-bold" id="eventModalLabel">Event erstellen / bearbeiten</h1>
+        <h1 class="modal-title fs-4 fw-bold" id="eventModalLabel">Event erstellen</h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
 
-      <!-- Body -->
       <div class="modal-body p-4">
-        <form>
-          <!-- Titel -->
+        <form id="createEventForm" method="POST" action="{% url 'planner:event_create' %}">
+          {% csrf_token %}
           <div class="mb-3">
             <label class="form-label text-muted small fw-bold">TITEL</label>
-            <input type="text" class="form-control form-control-lg bg-body-tertiary border-0" placeholder="z.B. Team Sync" required>
+            <input type="text" name="title" class="form-control form-control-lg bg-body-tertiary border-0" placeholder="z.B. Team Sync" required>
           </div>
 
-          <!-- Datum & Zeit Grid -->
           <div class="row g-3 mb-3">
             <div class="col-12 col-sm-6">
               <label class="form-label text-muted small fw-bold">STARTDATUM</label>
-              <input type="date" class="form-control bg-body-tertiary border-0" required>
+              <input type="date" lang="de-DE" name="start_date" class="form-control bg-body-tertiary border-0" required>
             </div>
             <div class="col-12 col-sm-6">
               <label class="form-label text-muted small fw-bold">STARTZEIT</label>
-              <input type="time" class="form-control bg-body-tertiary border-0">
+              <input type="time" name="start_time" class="form-control bg-body-tertiary border-0" required>
             </div>
             <div class="col-12 col-sm-6">
               <label class="form-label text-muted small fw-bold">ENDDATUM</label>
-              <input type="date" class="form-control bg-body-tertiary border-0" required>
+              <input type="date" lang="de-DE" name="end_date" class="form-control bg-body-tertiary border-0" required>
             </div>
             <div class="col-12 col-sm-6">
               <label class="form-label text-muted small fw-bold">ENDZEIT</label>
-              <input type="time" class="form-control bg-body-tertiary border-0">
+              <input type="time" name="end_time" class="form-control bg-body-tertiary border-0" required>
             </div>
           </div>
 
-          <!-- Kategorie -->
           <div class="mb-3">
             <label class="form-label text-muted small fw-bold">KATEGORIE</label>
-            <select class="form-select bg-body-tertiary border-0">
-              <option value="work">Work (Primärfarbe)</option>
-              <option value="personal">Personal (Grün)</option>
-              <option value="health">Health & Fitness (Rot)</option>
-              <option value="finance">Finance (Gelb)</option>
+            <select name="category" class="form-select bg-body-tertiary border-0">
+              <option value="">Keine Kategorie</option>
+              {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+              {% endfor %}
             </select>
           </div>
 
-          <!-- Beschreibung -->
           <div class="mb-4">
             <label class="form-label text-muted small fw-bold">NOTIZEN / BESCHREIBUNG</label>
-            <textarea class="form-control bg-body-tertiary border-0" rows="3" placeholder="Zusätzliche Infos, Links zum Meeting..."></textarea>
+            <textarea name="description" class="form-control bg-body-tertiary border-0" rows="3" placeholder="Zusätzliche Infos, Links zum Meeting..."></textarea>
           </div>
 
-          <!-- Buttons -->
           <div class="d-flex justify-content-end gap-2 mt-4 border-top pt-3">
             <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Abbrechen</button>
-            <!-- data-bs-dismiss schließt das Modal direkt nach Klick -->
-            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold" data-bs-dismiss="modal" onclick="event.preventDefault();">Speichern</button>
+            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Speichern</button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- SHOW / EDIT EVENT MODAL -->
+<div class="modal fade" id="editEventModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg">
+
+      <div class="modal-header border-bottom-0 pb-0">
+        <h1 class="modal-title fs-4 fw-bold">Event bearbeiten</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body p-4">
+        <!-- The action URL will be set dynamically via JS based on the clicked event -->
+        <form id="editEventForm" method="POST" action="">
+          {% csrf_token %}
+          
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">TITEL</label>
+            <input type="text" id="editTitle" name="title" class="form-control form-control-lg bg-body-tertiary border-0" required>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-sm-6">
+              <label class="form-label text-muted small fw-bold">STARTDATUM</label>
+              <input type="date" lang="de-DE" id="editStartDate" name="start_date" class="form-control bg-body-tertiary border-0" required>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label text-muted small fw-bold">STARTZEIT</label>
+              <input type="time" id="editStartTime" name="start_time" class="form-control bg-body-tertiary border-0" required>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label text-muted small fw-bold">ENDDATUM</label>
+              <input type="date" lang="de-DE" id="editEndDate" name="end_date" class="form-control bg-body-tertiary border-0" required>
+            </div>
+            <div class="col-12 col-sm-6">
+              <label class="form-label text-muted small fw-bold">ENDZEIT</label>
+              <input type="time" id="editEndTime" name="end_time" class="form-control bg-body-tertiary border-0" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-muted small fw-bold">KATEGORIE</label>
+            <select id="editCategory" name="category" class="form-select bg-body-tertiary border-0">
+              <option value="">Keine Kategorie</option>
+              {% for category in categories %}
+                <option value="{{ category.id }}">{{ category.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label text-muted small fw-bold">NOTIZEN / BESCHREIBUNG</label>
+            <textarea id="editDescription" name="description" class="form-control bg-body-tertiary border-0" rows="3"></textarea>
+          </div>
+
+          <div class="d-flex justify-content-between mt-4 border-top pt-3">
+            <!-- Delete Button passes a specific value to the view -->
+            <button type="submit" name="action" value="delete" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Löschen</button>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Abbrechen</button>
+              <button type="submit" name="action" value="save" class="btn btn-primary rounded-pill px-4 fw-bold">Speichern</button>
+            </div>
           </div>
         </form>
       </div>
@@ -203,8 +331,9 @@
   </div>
 </div>
 {% endblock %}
+
 {% block headers %}
-<<link rel="stylesheet" type="text/css" href="{% static 'planner/css/calendar.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'planner/css/calendar.css' %}">
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'planner/js/calendar.js' %}"></script>

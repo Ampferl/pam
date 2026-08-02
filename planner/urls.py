@@ -3,4 +3,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index_view, name='overview'),
+
+    path('event/create/', views.event_create, name='event_create'),
+    path('event/update/<int:event_id>/', views.event_update, name='event_update'),
 ]
