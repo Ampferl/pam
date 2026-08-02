@@ -1,5 +1,7 @@
 import calendar
+from icalendar import Calendar, Event as IcalEvent
 from datetime import timedelta, datetime
+from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils import timezone
@@ -203,4 +205,38 @@ def event_update(request, event_id):
                 pass
 
     return redirect(request.META.get('HTTP_REFERER', 'index'))
+
+
+# TODO: Add a unique UUID token to the feed as identifer to secure access
+def event_ics_feed(request):
+    cal = Calendar()
+    cal.add('prodid', '-//PAM//Alle Events//')
+    cal.add('version', '2.0')
+    cal.add('calscale', 'GREGORIAN')
+    cal.add('method', 'PUBLISH')
+    cal.add('x-wr-calname', 'Mein Planner (Alle)')
+
+    events = Event.objects.select_related('category').all()
+    for e in events:
+        ical_event = IcalEvent()
+        title = f"[{e.category.name}] {e.title}" if e.category else e.title
+        ical_event.add('summary', title)
+
+        if e.description:
+            ical_event.add('description', e.description)
+        if e.start_time:
+            ical_event.add('dtstart', e.start_time)
+        if e.end_time:
+            ical_event.add('dtend', e.end_time)
+
+        ical_event.add('dtstamp', timezone.now())
+        ical_event.add('uid', f'event-{e.id}@ampferl.com')
+        if e.category:
+            ical_event.add('categories', [e.category.name])
+
+        cal.add_component(ical_event)
+
+    response = HttpResponse(cal.to_ical(), content_type='text/calendar; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="alle_events.ics"'
+    return response
 

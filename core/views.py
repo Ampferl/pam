@@ -12,3 +12,18 @@ def index_view(request):
     }
     return render(request, "core/index.html", context)
 
+
+# NOTE: This is a PoC
+@login_required
+def management_view(request):
+    context = {
+        "switches": [
+            {"id": 0, "name": "Demo 1", "active": False},
+            {"id": 1, "name": "Demo 2", "active": True},
+            {"id": 2, "name": "Demo 3", "active": False},
+        ]
+    }
+    return render(request, "core/management/index.html", context)
+
+
+
