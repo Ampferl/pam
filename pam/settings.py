@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'account',
     'planner',
     'health',
+    'knowledgebase',
 ]
 
 MIDDLEWARE = [

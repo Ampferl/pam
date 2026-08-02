@@ -8,4 +8,7 @@ urlpatterns = [
     path('event/update/<int:event_id>/', views.event_update, name='event_update'),
 
     path('feed/', views.event_ics_feed, name='ics_feed'),
+
+    path('contacts/', views.contacts_view, name='contacts'),
+    path('contacts/<int:contact_id>', views.contacts_view, name='contact'),
 ]

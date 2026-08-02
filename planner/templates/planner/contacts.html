@@ -1,0 +1,152 @@
+{% extends "dashboard.html" %}
+{% load static %}
+
+{% block content %}
+<div class="h-100">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold tracking-tight mb-0">Kontakte</h2>
+    <button class="btn btn-primary rounded-pill px-4 fw-bold">
+      <i class="bi bi-person-plus me-2"></i> Neuer Kontakt
+    </button>
+  </div>
+
+  <div class="row g-4 h-100 min-vh-100">
+
+    <div class="col-12 col-md-4 col-lg-4 d-flex flex-column">
+      <div class="card border-0 shadow-sm h-100 bg-body-tertiary d-flex flex-column">
+
+        <!-- Search Form -->
+        <div class="p-3 border-bottom">
+          <!-- Form submits to the base contacts URL -->
+          <form method="GET" action="{% url 'planner:contacts' %}">
+            <div class="input-group">
+              <span class="input-group-text bg-body border-end-0 text-muted rounded-start-pill">
+                <i class="bi bi-search"></i>
+              </span>
+              <input type="text" name="q" value="{{ search_query }}" class="form-control bg-body border-start-0 rounded-end-pill shadow-none" placeholder="Kontakte suchen...">
+            </div>
+          </form>
+        </div>
+
+        <!-- Contact List -->
+        <div class="list-group list-group-flush overflow-auto flex-grow-1">
+          {% for c in page_obj %}
+            <!-- Append current search and page params to the URL so the sidebar state doesn't reset when clicking a contact -->
+            <a href="{% url 'planner:contact' c.id %}?q={{ search_query }}&page={{ page_obj.number }}" 
+               class="list-group-item list-group-item-action py-3 border-0 d-flex align-items-center gap-3 
+               {% if contact.id == c.id %}bg-body border-start border-primary border-4{% else %}bg-transparent{% endif %}">
+
+              <div class="rounded-circle bg-{{ c.color }} bg-opacity-10 text-{{ c.color }} fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 45px; height: 45px;">
+                {{ c.initials }}
+              </div>
+
+              <div class="flex-grow-1 overflow-hidden">
+                <h6 class="mb-0 fw-semibold text-truncate {% if contact.id == c.id %}text-primary{% else %}text-body{% endif %}">
+                  {{ c.first_name }} {{ c.last_name }}
+                </h6>
+                <small class="text-muted text-truncate d-block">{{ c.phone|default:"" }}</small>
+              </div>
+            </a>
+          {% empty %}
+            <div class="p-4 text-center text-muted">
+              <small>Keine Kontakte gefunden.</small>
+            </div>
+          {% endfor %}
+        </div>
+
+        <!-- Pagination Controls -->
+        {% if page_obj.paginator.num_pages > 1 %}
+        <div class="p-3 border-top d-flex justify-content-between align-items-center bg-body-tertiary rounded-bottom-4">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Zurück</a>
+          {% else %}
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" disabled>Zurück</button>
+          {% endif %}
+          
+          <span class="small fw-bold text-muted">
+            {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+          </span>
+          
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Weiter</a>
+          {% else %}
+            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" disabled>Weiter</button>
+          {% endif %}
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+    <div class="col-12 col-md-8 col-lg-8">
+      <div class="card border-0 shadow-sm h-100">
+
+        <div class="card-header bg-transparent border-bottom-0 p-4 d-flex align-items-sm-center flex-column flex-sm-row gap-4">
+          <div class="rounded-circle bg-{{ contact.color }} bg-opacity-10 text-{{ contact.color }} fw-bold d-flex align-items-center justify-content-center display-5 flex-shrink-0" style="width: 100px; height: 100px;">
+            {{ contact.initials }}
+          </div>
+          <div class="flex-grow-1">
+            <h3 class="fw-bold mb-1">{{contact.first_name}} {{contact.last_name}}</h3>
+            <p class="text-muted fs-5 mb-3"><i class="bi bi-house me-2"></i> {{contact.address}}</p>
+            {#<div class="d-flex gap-2"><button class="btn btn-outline-secondary rounded-pill btn-sm px-3"><i class="bi bi-envelope me-1"></i> E-Mail</button><button class="btn btn-outline-secondary rounded-pill btn-sm px-3"><i class="bi bi-telephone me-1"></i> Anrufen</button></div>#}
+          </div>
+        </div>
+
+        <!-- Body (Edit Form) -->
+        <div class="card-body p-4 border-top">
+          <h5 class="fw-bold mb-4">Kontaktinformationen</h5>
+
+          <form>
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label text-muted small fw-bold">VORNAME</label>
+                <input type="text" class="form-control bg-body-tertiary border-0" value="{{contact.first_name}}">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted small fw-bold">NACHNAME</label>
+                <input type="text" class="form-control bg-body-tertiary border-0" value="{{contact.last_name}}">
+              </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label text-muted small fw-bold">E-MAIL</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-body-tertiary border-0 text-muted"><i class="bi bi-envelope"></i></span>
+                  <input type="email" class="form-control bg-body-tertiary border-0" value="{{contact.email}}">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label text-muted small fw-bold">TELEFON</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-body-tertiary border-0 text-muted"><i class="bi bi-telephone"></i></span>
+                  <input type="tel" class="form-control bg-body-tertiary border-0" value="{{contact.phone}}">
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label text-muted small fw-bold">ADDRESSE</label>
+              <div class="input-group">
+                <span class="input-group-text bg-body-tertiary border-0 text-muted"><i class="bi bi-house"></i></span>
+                <input type="text" class="form-control bg-body-tertiary border-0" value="{{contact.address}}">
+              </div>
+            </div>
+
+            <div class="mb-4">
+              <label class="form-label text-muted small fw-bold">NOTIZEN</label>
+              <textarea class="form-control bg-body-tertiary border-0 resize-none" rows="4">{{contact.notes}}</textarea>
+            </div>
+
+            <div class="d-flex justify-content-between border-top pt-4">
+              <button type="button" class="btn btn-outline-danger rounded-pill px-4">Löschen</button>
+              <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Änderungen speichern</button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

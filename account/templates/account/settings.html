@@ -2,7 +2,6 @@
 {% block content %}
 <div>
   <h2 class="fw-bold tracking-tight mb-4">Einstellungen</h2>
-
   <div class="row g-4">
     <div class="col-12 col-lg-8">
       <div class="card border-0 shadow-sm mb-4">
@@ -29,7 +28,7 @@
           </form>
         </div>
       </div>
-      <div class="card border-0 shadow-sm">
+      <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
           <h5 class="fw-bold mb-4">Benachrichtigungen</h5>
           <div class="form-check form-switch fs-5 mb-3">
@@ -44,6 +43,14 @@
             <input class="form-check-input shadow-none" type="checkbox" id="notif3">
             <label class="form-check-label fs-6 mt-1 ms-2" for="notif3">Wöchentlicher Report</label>
           </div>
+        </div>
+      </div>
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4">PAM Management</h5>
+          <ul>
+            <li><a href="{% url 'core:management_overview' %}">Feature Toggles</a></li>
+          </ul>
         </div>
       </div>
     </div>

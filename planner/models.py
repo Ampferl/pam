@@ -41,3 +41,41 @@ class Event(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.start_time.date()})"
+
+
+class Contact(models.Model):
+    first_name = models.CharField(max_length=150)
+    last_name = models.CharField(max_length=150, blank=True)
+
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=50, blank=True, null=True)
+    address = models.CharField(max_length=255, blank=True, null=True)
+
+    notes = models.TextField(blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Kontakt'
+        verbose_name_plural = 'Kontakte'
+        ordering = ['first_name', 'last_name']
+
+    def __str__(self):
+        if self.last_name:
+            return f"{self.first_name} {self.last_name}"
+        return self.first_name
+
+    @property
+    def color(self):
+        if not self.id:
+            return 'primary'
+        colors = ['primary', 'success', 'danger', 'warning', 'info', 'secondary']
+        return colors[self.id % len(colors)]
+
+    @property
+    def initials(self):
+        first = self.first_name[0].upper() if self.first_name else ''
+        last = self.last_name[0].upper() if self.last_name else ''
+        return f"{first}{last}"
+

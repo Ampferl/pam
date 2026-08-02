@@ -7,8 +7,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_time
 from django.utils.timezone import make_aware
-from .models import Event, Category
-
+from django.core.paginator import Paginator
+from django.db.models import Q
+from .models import Event, Category, Contact 
 
 @login_required
 def index_view(request):
@@ -240,3 +241,33 @@ def event_ics_feed(request):
     response['Content-Disposition'] = 'attachment; filename="alle_events.ics"'
     return response
 
+
+
+def contacts_view(request, contact_id:int=None):
+    contacts = Contact.objects.all()
+
+    search_query = request.GET.get('q', '').strip().lower()
+    if search_query:
+        contacts = contacts.filter(
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query) |
+            Q(phone__icontains=search_query) |
+            Q(email__icontains=search_query)
+        )
+
+    paginator = Paginator(contacts, 12)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
+    selected_contact = None
+    if contact_id:
+        selected_contact = Contact.objects.filter(id=contact_id).first()
+
+    if not selected_contact and page_obj.object_list:
+        selected_contact = page_obj.object_list[0]
+
+    return render(request, 'planner/contacts.html', {
+        'page_obj': page_obj,
+        'contact': selected_contact,
+        'search_query': search_query
+    })

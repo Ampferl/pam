@@ -1,58 +1,28 @@
 {% extends "dashboard.html" %}
-{% load static %}
 {% block content %}
 <div>
   <h2 class="fw-bold tracking-tight mb-4">Managemetn Dashboard</h2>
-
-      <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body p-4">
-          <h5 class="fw-bold mb-4">Profil & Account</h5>
-          <form>
-            <div class="row g-3">
-              <div class="col-12">
-                <textarea id="scratchpad"></textarea>
-              </div>
-              <div class="col-12 mt-4">
-                <button type="button" class="btn btn-primary rounded-pill px-4">Änderungen speichern</button>
-              </div>
-            </div>
-          </form>
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <form method="POST" action="">
+        <h5 class="fw-bold mb-4">Feature Switches</h5>
+        {% for s in switches %}
+        <div class="form-check form-switch fs-5 mb-3">
+          <input class="form-check-input shadow-none" type="checkbox" id="toggle_{{s.id}}" {% if s.active %}checked{% endif %}>
+          <label class="form-check-label fs-6 mt-1 ms-2" for="toggle_{{s.id}}">{{s.name}}</label>
         </div>
-      </div>
-      <div class="card border-0 shadow-sm">
-        <div class="card-body p-4">
-          <form method="POST" action="">
-          <h5 class="fw-bold mb-4">Feature Switches</h5>
-          {% for s in switches %}
-          <div class="form-check form-switch fs-5 mb-3">
-            <input class="form-check-input shadow-none" type="checkbox" id="toggle_{{s.id}}" {% if s.active %}checked{% endif %}>
-            <label class="form-check-label fs-6 mt-1 ms-2" for="toggle_{{s.id}}">{{s.name}}</label>
-          </div>
-          {% endfor %}
-          <div class="col-12 mt-4">
-            <button type="button" class="btn btn-primary rounded-pill px-4">Änderungen speichern</button>
-          </div>
-          </form>
+        {% endfor %}
+        <div class="col-12 mt-4">
+          <button type="button" class="btn btn-primary rounded-pill px-4">Änderungen speichern</button>
         </div>
-      </div>
+      </form>
     </div>
   </div>
+</div>
+</div>
 </div>
 
 {% endblock %}
 
-{% block headers %}
-<link rel="stylesheet" type="text/css" href="{% static 'easymde/easymde.min.css' %}">
-{% endblock %}
-
-{% block scripts %}
-<script src="{% static 'easymde/easymde.min.js' %}"></script>
-<script>
-  const easyMDE = new EasyMDE({
-    element: document.getElementById('scratchpad'),
-    spellChecker: false
-  });
-</script>
-{% endblock %}
 
 
