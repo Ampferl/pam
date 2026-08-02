@@ -4,6 +4,7 @@ from datetime import timedelta, datetime
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_time
 from django.utils.timezone import make_aware
@@ -242,7 +243,7 @@ def event_ics_feed(request):
     return response
 
 
-
+@login_required
 def contacts_view(request, contact_id:int=None):
     contacts = Contact.objects.all()
 
@@ -263,7 +264,9 @@ def contacts_view(request, contact_id:int=None):
     if contact_id:
         selected_contact = Contact.objects.filter(id=contact_id).first()
 
-    if not selected_contact and page_obj.object_list:
+    if request.GET.get('new') == 'true':
+        selected_contact = None
+    elif not selected_contact and page_obj.object_list:
         selected_contact = page_obj.object_list[0]
 
     return render(request, 'planner/contacts.html', {
@@ -271,3 +274,27 @@ def contacts_view(request, contact_id:int=None):
         'contact': selected_contact,
         'search_query': search_query
     })
+
+@login_required
+@require_POST
+def contact_save(request, contact_id=None):
+    if contact_id:
+        contact = get_object_or_404(Contact, id=contact_id)
+
+        if request.POST.get('action') == 'delete':
+            contact.delete()
+            return redirect('planner:contacts')
+    else:
+        contact = Contact()
+
+    contact.first_name = request.POST.get('first_name', '')
+    contact.last_name = request.POST.get('last_name', '')
+    contact.email = request.POST.get('email', '')
+    contact.phone = request.POST.get('phone', '')
+    contact.address = request.POST.get('address', '')
+    contact.notes = request.POST.get('notes', '')
+
+    contact.save()
+
+    return redirect('planner:contact', contact_id=contact.id)
+
