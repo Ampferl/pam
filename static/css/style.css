@@ -92,6 +92,72 @@ body {
 }
 
 /* ==========================================
+   DYNAMIC BOOTSTRAP PRIMARY COMPONENT OVERRIDES
+   ========================================== */
+:root {
+  --bs-link-color: var(--text-main) !important;
+  --bs-link-hover-color: color-mix(in srgb, var(--bs-primary), black 20%) !important;
+  
+  /* Alerts, Badges, and List Groups (Light Mode) */
+  --bs-primary-bg-subtle: color-mix(in srgb, var(--bs-primary), white 84%) !important;
+  --bs-primary-border-subtle: color-mix(in srgb, var(--bs-primary), white 60%) !important;
+  --bs-primary-text-emphasis: color-mix(in srgb, var(--bs-primary), black 40%) !important;
+}
+
+[data-bs-theme="dark"] {
+  --bs-link-hover-color: color-mix(in srgb, var(--bs-primary), white 20%) !important;
+  
+  /* Alerts, Badges, and List Groups (Dark Mode) */
+  --bs-primary-bg-subtle: color-mix(in srgb, var(--bs-primary), black 80%) !important;
+  --bs-primary-border-subtle: color-mix(in srgb, var(--bs-primary), black 40%) !important;
+  --bs-primary-text-emphasis: color-mix(in srgb, var(--bs-primary), white 20%) !important;
+}
+
+/* Solid Primary Buttons */
+.btn-primary {
+  --bs-btn-bg: var(--bs-primary) !important;
+  --bs-btn-border-color: var(--bs-primary) !important;
+  --bs-btn-hover-bg: color-mix(in srgb, var(--bs-primary), black 15%) !important;
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--bs-primary), black 20%) !important;
+  --bs-btn-active-bg: color-mix(in srgb, var(--bs-primary), black 20%) !important;
+  --bs-btn-active-border-color: color-mix(in srgb, var(--bs-primary), black 25%) !important;
+  --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb) !important;
+}
+
+/* Outline Primary Buttons */
+.btn-outline-primary {
+  --bs-btn-color: var(--bs-primary) !important;
+  --bs-btn-border-color: var(--bs-primary) !important;
+  --bs-btn-hover-bg: var(--bs-primary) !important;
+  --bs-btn-hover-border-color: var(--bs-primary) !important;
+  --bs-btn-active-bg: var(--bs-primary) !important;
+  --bs-btn-active-border-color: var(--bs-primary) !important;
+  --bs-btn-focus-shadow-rgb: var(--bs-primary-rgb) !important;
+}
+
+/* Utilities (Backgrounds & Text) */
+.bg-primary {
+  background-color: var(--bs-primary) !important;
+}
+.text-primary {
+  color: var(--bs-primary) !important;
+}
+
+/* Form Inputs Focus Rings */
+.form-control:focus, 
+.form-select:focus, 
+.form-check-input:focus {
+  border-color: color-mix(in srgb, var(--bs-primary), white 20%) !important;
+  box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25) !important;
+}
+
+[data-bs-theme="dark"] .form-control:focus, 
+[data-bs-theme="dark"] .form-select:focus, 
+[data-bs-theme="dark"] .form-check-input:focus {
+  border-color: color-mix(in srgb, var(--bs-primary), black 20%) !important;
+}
+
+/* ==========================================
    LAYOUT & NAVIGATION
    ========================================== */
 #sidebar { 
@@ -145,23 +211,33 @@ body {
 }
 
 .form-check-input:checked { 
-  background-color: var(--bs-primary); 
-  border-color: var(--bs-primary); 
+  background-color: var(--bs-primary) !important; 
+  border-color: var(--bs-primary) !important; 
 }
-.resize-none { 
+
+/* Optional: Slight darken effect when actively clicking/holding the switch */
+.form-check-input:active {
+  filter: brightness(90%);
+}
+
+resize-none { 
   resize: none; 
 }
 
 .color-selector {
-  width: 28px; 
-  height: 28px; 
+  width: 32px; 
+  height: 32px; 
   border-radius: var(--radius-circle); 
-  border: 2px solid transparent;
+  border: 2px solid white;
+  box-shadow: 0 0 0 1px #dee2e6;
   cursor: pointer; 
-  transition: transform 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 .color-selector:hover { 
   transform: scale(1.1); 
+}
+.color-selector.active {
+  box-shadow: 0 0 0 2px var(--text-main); 
 }
 
 /* ==========================================
