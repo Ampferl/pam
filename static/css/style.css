@@ -1,84 +1,248 @@
-/* Basis & Typografie */
+/* ==========================================
+   CSS VARIABLES (THEME CONFIGURATION)
+   ========================================== */
+:root {
+  /* Colors - Light Theme (Default) */
+  --bg-main: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-tertiary: #e2e8f0; /* Used for hovers, code blocks, etc. */
+  --border-color: rgba(0, 0, 0, 0.05);
+  
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-inverse: #f8fafc;
+  --bg-inverse: #0f172a;
+  
+  --selection-bg: #b3d4fc;
+
+  /* Shadows */
+  --shadow-sm: 0 4px 12px rgba(var(--bs-primary-rgb), 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.03);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.08);
+  
+  /* Border Radii */
+  --radius-sm: 0.75rem;
+  --radius-lg: 1.25rem;
+  --radius-round: 50rem;
+  --radius-circle: 100%;
+  
+  /* Transitions */
+  --transition-default: all 0.2s ease;
+  --transition-bg: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+[data-bs-theme="dark"] {
+  /* Colors - Dark Theme Override */
+  --bg-main: #0f172a;
+  --bg-card: #1e293b;
+  --bg-tertiary: #334155; 
+  --border-color: #334155;
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
+  --bg-inverse: #f8fafc;
+  
+  --selection-bg: #3b5070;
+}
+
+/* ==========================================
+   BASE & TYPOGRAPHY
+   ========================================== */
 body {
   font-family: 'Inter', sans-serif;
   overflow-x: hidden;
-  background-color: #f8fafc;
-  transition: background-color 0.3s ease;
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  transition: var(--transition-bg);
 }
 
-.profile-logo{
+.profile-logo {
   width: 40px;
   height: 40px;
-  background-color: #f8fafc;
-  color: #0f172a;
+  background-color: var(--bg-inverse);
+  color: var(--text-inverse);
   margin-right: 20px;
   text-align: center;
-  padding:5px;
-  border-radius: 100%;
+  padding: 5px;
+  border-radius: var(--radius-circle);
 }
 
-
-/* Dark Mode Anpassungen */
-[data-bs-theme="dark"] body { background-color: #0f172a !important; }
-[data-bs-theme="dark"] .bg-body-tertiary { background-color: #1e293b !important; }
-[data-bs-theme="dark"] .card, [data-bs-theme="dark"] .list-group-item {
-  background-color: #1e293b !important;
-  border-color: #334155 !important;
+/* ==========================================
+   DARK MODE OVERRIDES (BOOTSTRAP)
+   ========================================== */
+[data-bs-theme="dark"] .bg-body-tertiary { 
+  background-color: var(--bg-tertiary) !important; 
 }
-[data-bs-theme="dark"] .border, [data-bs-theme="dark"] .border-bottom, [data-bs-theme="dark"] .border-end {
-  border-color: #334155 !important;
+[data-bs-theme="dark"] .card, 
+[data-bs-theme="dark"] .list-group-item {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
 }
-[data-bs-theme="dark"] .form-control, [data-bs-theme="dark"] .form-select, [data-bs-theme="light"] .profile-logo {
-  background-color: #0f172a;
-  border-color: #334155;
-  color: #f8fafc;
+[data-bs-theme="dark"] .border, 
+[data-bs-theme="dark"] .border-bottom, 
+[data-bs-theme="dark"] .border-end {
+  border-color: var(--border-color) !important;
+}
+[data-bs-theme="dark"] .form-control, 
+[data-bs-theme="dark"] .form-select {
+  background-color: var(--bg-main);
+  border-color: var(--border-color);
+  color: var(--text-main);
 }
 
-
-/* Layout & Navigation */
-#sidebar { width: 280px; min-height: 100vh; border-right: 1px solid rgba(0,0,0,0.05); }
+/* ==========================================
+   LAYOUT & NAVIGATION
+   ========================================== */
+#sidebar { 
+  width: 280px; 
+  min-height: 100vh; 
+  border-right: 1px solid var(--border-color); 
+}
 .nav-link {
-  color: var(--bs-body-color);
-  border-radius: 50rem;
+  color: var(--text-main);
+  border-radius: var(--radius-round);
   margin-bottom: 0.25rem;
   padding: 0.6rem 1.25rem;
   font-weight: 500;
-  transition: all 0.2s ease;
+  transition: var(--transition-default);
   cursor: pointer;
 }
-.nav-link:hover { background-color: rgba(var(--bs-primary-rgb), 0.1); color: var(--bs-primary); }
+.nav-link:hover { 
+  background-color: rgba(var(--bs-primary-rgb), 0.1); 
+  color: var(--bs-primary); 
+}
 .nav-link.active {
   background-color: var(--bs-primary);
   color: white;
-  box-shadow: 0 4px 12px rgba(var(--bs-primary-rgb), 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
-/* UI Elemente */
+/* ==========================================
+   UI ELEMENTS
+   ========================================== */
 .card {
-  border-radius: 1.25rem;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-  border: 1px solid rgba(0,0,0,0.05);
+  background-color: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-.card-hover:hover { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08); transform: translateY(-2px); }
+.card-hover:hover { 
+  box-shadow: var(--shadow-hover); 
+  transform: translateY(-2px); 
+}
 
 .icon-box {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 32px; height: 32px; border-radius: 0.75rem;
-  background-color: rgba(var(--bs-primary-rgb), 0.1); color: var(--bs-primary);
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center;
+  width: 32px; 
+  height: 32px; 
+  border-radius: var(--radius-sm);
+  background-color: rgba(var(--bs-primary-rgb), 0.1); 
+  color: var(--bs-primary);
 }
 
-.form-check-input:checked { background-color: var(--bs-primary); border-color: var(--bs-primary); }
-.resize-none { resize: none; }
+.form-check-input:checked { 
+  background-color: var(--bs-primary); 
+  border-color: var(--bs-primary); 
+}
+.resize-none { 
+  resize: none; 
+}
 
 .color-selector {
-  width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
-  cursor: pointer; transition: transform 0.2s;
+  width: 28px; 
+  height: 28px; 
+  border-radius: var(--radius-circle); 
+  border: 2px solid transparent;
+  cursor: pointer; 
+  transition: transform 0.2s;
 }
-.color-selector:hover { transform: scale(1.1); }
+.color-selector:hover { 
+  transform: scale(1.1); 
+}
 
-/* SPA View Management */
-@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+/* ==========================================
+   SPA VIEW MANAGEMENT & UTILS
+   ========================================== */
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(10px); } 
+  to { opacity: 1; transform: translateY(0); } 
+}
 
-/* Rezept Image Grid */
-.recipe-img { height: 180px; object-fit: cover; border-top-left-radius: 1.25rem; border-top-right-radius: 1.25rem; }
+.recipe-img { 
+  height: 180px; 
+  object-fit: cover; 
+  border-top-left-radius: var(--radius-lg); 
+  border-top-right-radius: var(--radius-lg); 
+}
+
+/* ==========================================
+   EASYMDE (INHERITS GLOBAL VARIABLES)
+   ========================================== */
+.editor-toolbar {
+  background-color: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-main) !important;
+  border-top-left-radius: var(--radius-sm) !important;
+  border-top-right-radius: var(--radius-sm) !important;
+}
+
+.editor-toolbar > button {
+  color: var(--text-main) !important;
+}
+
+.editor-toolbar > button:hover,
+.editor-toolbar > button.active {
+  background-color: var(--bg-tertiary) !important;
+  border-color: transparent !important;
+}
+
+.editor-toolbar i.separator {
+  border-left: 1px solid var(--border-color) !important;
+  border-right: none !important;
+}
+
+.CodeMirror {
+  background-color: var(--bg-main) !important;
+  color: var(--text-main) !important;
+  border-color: var(--border-color) !important;
+  border-bottom-left-radius: var(--radius-sm) !important;
+  border-bottom-right-radius: var(--radius-sm) !important;
+}
+
+.CodeMirror-cursor {
+  border-left-color: var(--text-main) !important;
+}
+
+.CodeMirror-selected {
+  background-color: var(--selection-bg) !important;
+}
+
+.editor-statusbar {
+  color: var(--text-muted) !important;
+}
+
+.editor-toolbar.fullscreen,
+.CodeMirror-fullscreen,
+.editor-preview-side {
+  background-color: var(--bg-main) !important;
+}
+
+.editor-preview {
+  background-color: var(--bg-main) !important;
+  color: var(--text-main) !important;
+}
+
+.editor-preview pre,
+.editor-preview code {
+  background-color: var(--bg-tertiary) !important;
+  color: var(--text-main) !important;
+}
+
+.editor-preview table th,
+.editor-preview table td {
+  border-color: var(--border-color) !important;
+}
