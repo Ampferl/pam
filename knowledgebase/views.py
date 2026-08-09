@@ -18,6 +18,19 @@ def build_tree_recursive(item, active_item_id):
     }
     return node
 
+
+def flatten_folders(nodes, depth=0):
+    folders = []
+    for node in nodes:
+        if node["type"] == "folder":
+            folders.append({
+                "id": node["id"],
+                "label": ("— " * depth) + node["name"],
+            })
+            folders.extend(flatten_folders(node["children"], depth + 1))
+    return folders
+
+
 @login_required
 def index_view(request, item_id=None):
     items = KnowledgeItem.objects.filter()
@@ -35,6 +48,7 @@ def index_view(request, item_id=None):
     context = {
         "file_tree": file_tree,
         "active_item": active_item,
+        "all_folders": flatten_folders(file_tree),
     }
     return render(request, 'knowledge/index.html', context)
 

@@ -111,18 +111,25 @@
             </div>
 
             <div class="row g-3 mb-4">
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <label class="form-label text-muted small fw-bold">E-MAIL</label>
                 <div class="input-group">
                   <span class="input-group-text bg-body-tertiary border-0 text-muted"><i class="bi bi-envelope"></i></span>
                   <input type="email" name="email" class="form-control bg-body-tertiary border-0" value="{{ contact.email|default:'' }}">
                 </div>
               </div>
-              <div class="col-md-6">
+              <div class="col-md-4">
                 <label class="form-label text-muted small fw-bold">TELEFON</label>
                 <div class="input-group">
                   <span class="input-group-text bg-body-tertiary border-0 text-muted"><i class="bi bi-telephone"></i></span>
                   <input type="tel" name="phone" class="form-control bg-body-tertiary border-0" value="{{ contact.phone|default:'' }}">
+                </div>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label text-muted small fw-bold">GEBURTSTAG</label>
+                <div class="input-group">
+                  <span class="input-group-text bg-body-tertiary border-0 text-muted"><i class="bi bi-date"></i></span>
+                  <input type="date" name="birthday" class="form-control bg-body-tertiary border-0" value="{{ contact.birthday|date:'Y-m-d'|default:'' }}">
                 </div>
               </div>
             </div>

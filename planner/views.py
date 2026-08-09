@@ -10,7 +10,11 @@ from django.utils.dateparse import parse_date, parse_time
 from django.utils.timezone import make_aware
 from django.core.paginator import Paginator
 from django.db.models import Q
+from core.calendar_sources import get_all_items, get_sources, get_source_subgroups
 from .models import Event, Category, Contact 
+
+
+
 
 @login_required
 def index_view(request):
@@ -52,60 +56,21 @@ def index_view(request):
     start_date = month_days[0]
     end_date = month_days[-1]
 
-    events = Event.objects.filter(
-        start_time__date__lte=end_date,
-        end_time__date__gte=start_date
-    ).select_related('category')
+    items = get_all_items(start_date, end_date, request.user)
 
     events_by_date = {day: [] for day in month_days}
+    allday_by_date = {day: [] for day in month_days}
+    for item in items:
+        if item.date not in events_by_date:
+            continue
+        if item.all_day:
+            allday_by_date[item.date].append(item)
+        else:
+            start_minutes = item.start_time.hour * 60 + item.start_time.minute
+            end_minutes = item.end_time.hour * 60 + item.end_time.minute if item.end_time else start_minutes + 30
 
-    for event in events:
-        local_start = timezone.localtime(event.start_time)
-        local_end = timezone.localtime(event.end_time)
-
-        # Fallback just in case an event's end time is before its start time
-        if local_end < local_start:
-            local_end = local_start
-
-        current_date = local_start.date()
-        end_date_iter = local_end.date()
-
-        # If an event ends exactly at midnight (00:00), it shouldn't render as an empty block on the next day
-        if local_end.hour == 0 and local_end.minute == 0 and current_date != end_date_iter:
-            end_date_iter -= timedelta(days=1)
-
-        # Loop through every day this event touches
-        while current_date <= end_date_iter:
-            # Only process the day if it's currently visible on our grid
-            if current_date in events_by_date:
-
-                # 1. Calculate the start position for THIS specific day column
-                if current_date == local_start.date():
-                    start_minutes = (local_start.hour * 60) + local_start.minute
-                else:
-                    start_minutes = 0 # If it's a middle day, start at exactly 00:00 (top of the column)
-
-                # 2. Calculate the end position for THIS specific day column
-                if current_date == local_end.date():
-                    end_minutes = (local_end.hour * 60) + local_end.minute
-                else:
-                    end_minutes = 24 * 60 # If it's not the final day, it ends at 24:00
-
-                # 3. Calculate height
-                duration_minutes = end_minutes - start_minutes
-                height = max(duration_minutes, 20) # Minimum 20px height so it's clickable
-
-                if start_minutes + height > 1440:
-                    height = 1440 - start_minutes
-
-                events_by_date[current_date].append({
-                    'obj': event,
-                    'top_px': start_minutes,
-                    'height_px': height,
-                })
-
-            # Move to the next day in the multi-day event
-            current_date += timedelta(days=1)
+            height = max(end_minutes - start_minutes, 20)
+            events_by_date[item.date].append({'item': item, 'top_px': start_minutes, 'height_px': height})
 
     # 5. Build Final Context
     calendar_month_grid = []
@@ -114,7 +79,8 @@ def index_view(request):
             'date': day,
             'is_current_month': day.month == month,
             'is_today': day == timezone.localdate(),
-            'events': events_by_date.get(day, [])
+            'allday_events': allday_by_date.get(day, []),
+            'events': events_by_date.get(day, []),
         })
 
     calendar_week_grid = []
@@ -122,7 +88,8 @@ def index_view(request):
         calendar_week_grid.append({
             'date': day,
             'is_today': day == timezone.localdate(),
-            'events': events_by_date.get(day, [])
+            'events': events_by_date.get(day, []),
+            'allday_events': allday_by_date.get(day, []),
         })
 
     # Formatting text
@@ -143,9 +110,14 @@ def index_view(request):
         'calendar_month_grid': calendar_month_grid,
         'calendar_week_grid': calendar_week_grid,
         'day_events': events_by_date.get(target_date, []),
+        'day_allday_events': allday_by_date.get(target_date, []),
         'target_day_is_today': target_date == timezone.localdate(),
 
         'categories': Category.objects.all(),
+        'calendar_sources': [
+            {'key': s.key, 'label': s.label, 'subgroups': get_source_subgroups(s)}
+            for s in get_sources()
+        ],
     }
 
     return render(request, "planner/index.html", context)
@@ -182,31 +154,37 @@ def event_create(request):
 
 
 @login_required
-def event_update(request, event_id):
+def event_detail(request, event_id):
     event = get_object_or_404(Event, id=event_id)
 
     if request.method == 'POST':
         if request.POST.get('action') == 'delete':
             event.delete()
-        else:
-            event.title = request.POST.get('title')
-            event.description = request.POST.get('description')
-            category_id = request.POST.get('category')
-            event.category = Category.objects.filter(id=category_id).first() if category_id else None
+            return redirect('planner:overview')
 
-            start_date = request.POST.get('start_date')
-            start_time = request.POST.get('start_time')
-            end_date = request.POST.get('end_date')
-            end_time = request.POST.get('end_time')
+        event.title = request.POST.get('title')
+        event.description = request.POST.get('description')
+        category_id = request.POST.get('category')
+        event.category = Category.objects.filter(id=category_id).first() if category_id else None
 
-            try:
-                event.start_time = make_aware(datetime.combine(parse_date(start_date), parse_time(start_time)))
-                event.end_time = make_aware(datetime.combine(parse_date(end_date), parse_time(end_time)))
-                event.save()
-            except (TypeError, ValueError):
-                pass
+        start_date = request.POST.get('start_date')
+        start_time = request.POST.get('start_time')
+        end_date = request.POST.get('end_date')
+        end_time = request.POST.get('end_time')
 
-    return redirect(request.META.get('HTTP_REFERER', 'index'))
+        try:
+            event.start_time = make_aware(datetime.combine(parse_date(start_date), parse_time(start_time)))
+            event.end_time = make_aware(datetime.combine(parse_date(end_date), parse_time(end_time)))
+            event.full_clean()
+            event.save()
+            return redirect(f'{reverse('planner:overview')}?date={event.start_time.date()}&view=day')
+        except (TypeError, ValueError):
+            pass
+
+    return render(request, 'planner/event_detail.html', {
+        'event': event,
+        'categories': Category.objects.all(),
+    })
 
 
 # TODO: Add a unique UUID token to the feed as identifer to secure access
@@ -218,23 +196,28 @@ def event_ics_feed(request):
     cal.add('method', 'PUBLISH')
     cal.add('x-wr-calname', 'Mein Planner (Alle)')
 
-    events = Event.objects.select_related('category').all()
-    for e in events:
-        ical_event = IcalEvent()
-        title = f"[{e.category.name}] {e.title}" if e.category else e.title
-        ical_event.add('summary', title)
+    today = timezone.localdate()
+    start_date = today - timedelta(days=365)
+    end_date = today + timedelta(days=730)
 
-        if e.description:
-            ical_event.add('description', e.description)
-        if e.start_time:
-            ical_event.add('dtstart', e.start_time)
-        if e.end_time:
-            ical_event.add('dtend', e.end_time)
+    items = get_all_items(start_date, end_date, request.user)
+
+    for item in items:
+        ical_event = IcalEvent()
+        ical_event.add('summary', item.title)
+
+        if item.description:
+            ical_event.add('description', item.description)
+
+        if item.all_day:
+            ical_event.add('dtstart', item.date)
+            ical_event.add('dtend', item.date + timedelta(days=1))
+        else:
+            ical_event.add('dtstart', make_aware(datetime.combine(item.date, item.start_time)))
+            ical_event.add('dtend', make_aware(datetime.combine(item.date, item.end_time or item.start_time)))
 
         ical_event.add('dtstamp', timezone.now())
-        ical_event.add('uid', f'event-{e.id}@ampferl.com')
-        if e.category:
-            ical_event.add('categories', [e.category.name])
+        ical_event.add('uid', f'{item.source_key}-{item.url}-{item.date.isoformat()}@ampferl.com')
 
         cal.add_component(ical_event)
 
@@ -292,6 +275,7 @@ def contact_save(request, contact_id=None):
     contact.email = request.POST.get('email', '')
     contact.phone = request.POST.get('phone', '')
     contact.address = request.POST.get('address', '')
+    contact.birthday = request.POST.get('birthday', '')
     contact.notes = request.POST.get('notes', '')
 
     contact.save()

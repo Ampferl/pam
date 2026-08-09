@@ -1,31 +1,40 @@
+from datetime import timedelta, datetime
 from django.utils import timezone
-from .models import Event
+from core.calendar_sources import get_all_items
 
 
-def get_upcoming_events(limit=3):
-    now = timezone.now()
+def get_upcoming_events(user, limit=3):
+    now = timezone.localtime(timezone.now())
+    today = now.date()
+    horizon = today + timedelta(days=90)
 
-    events = Event.objects.filter(
-        end_time__gte=now
-    ).select_related('category').order_by('start_time')[:limit]
+    items = get_all_items(today, horizon, user)
+
+    upcoming = []
+    for item in items:
+        end_time = item.end_time or item.start_time or datetime.max.time()
+        item_end = timezone.make_aware(datetime.combine(item.date, end_time))
+        if item_end >= now:
+            upcoming.append(item)
+
+    upcoming.sort(key=lambda i: (i.date, i.start_time or datetime.min.time()))
+    upcoming = upcoming[:limit]
 
     german_months_short = [
-        "", "JAN", "FEB", "MÄR", "APR", "MAI", "JUN", 
+        "", "JAN", "FEB", "MÄR", "APR", "MAI", "JUN",
         "JUL", "AUG", "SEP", "OKT", "NOV", "DEZ"
     ]
 
     upcoming_list = []
-    for event in events:
-        local_start = timezone.localtime(event.start_time)
-        local_end = timezone.localtime(event.end_time)
-
+    for item in upcoming:
+        time_str = "Ganztägig" if item.all_day else f"{item.start_time.strftime('%H:%M')} - {item.end_time.strftime('%H:%M')} Uhr"
         upcoming_list.append({
-            'id': event.id,
-            'title': event.title,
-            'day': local_start.day,  # e.g., 14
-            'month': german_months_short[local_start.month],  # e.g., 'OKT'
-            'time_str': f"{local_start.strftime('%H:%M')} - {local_end.strftime('%H:%M')} Uhr",
-            'color': event.category.color_hex if event.category else '#0d6efd',
+            'title': item.title,
+            'day': item.date.day,
+            'month': german_months_short[item.date.month],
+            'time_str': time_str,
+            'color': item.color,
+            'url': item.url,
         })
 
     return upcoming_list

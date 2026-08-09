@@ -1,7 +1,9 @@
 /* Responsive Calendar */
 .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-.calendar-day { min-height: 100px; padding: 10px; border-radius: 10px; background-color: var(--bs-secondary-bg); border: 1px solid var(--bs-border-color); }
+.calendar-day { min-height: 100px; padding: 10px; border-radius: 10px; background-color: var(--bs-secondary-bg); border: 1px solid var(--bs-border-color); cursor: pointer; }
 .cal-event { font-size: 0.75rem; padding: 4px 8px; border-radius: 6px; background-color: rgba(var(--bs-primary-rgb), 0.1); color: var(--bs-primary); font-weight: 600; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal-event-allday { font-weight: 700; }
+.cal-day-column { cursor: pointer; }
 
 /* Refactored Calendar Layout classes */
 .min-w-600px { min-width: 600px; }
@@ -42,3 +44,4 @@
 
 @media (max-width: 767.98px) {
   .calendar-grid { gap: 4px; }
+}

@@ -1,0 +1,59 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+  <a href="{% url 'planner:overview' %}" class="btn btn-outline-secondary btn-sm rounded-pill me-3">
+    <i class="bi bi-arrow-left"></i>
+  </a>
+  <h3 class="fw-bold mb-0">Event bearbeiten</h3>
+</div>
+
+<div class="card p-4" style="max-width: 600px;">
+  <form method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label text-muted small fw-bold">TITEL</label>
+      <input type="text" name="title" value="{{ event.title }}" class="form-control form-control-lg bg-body-tertiary border-0" required>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-12 col-sm-6">
+        <label class="form-label text-muted small fw-bold">STARTDATUM</label>
+        <input type="date" lang="de-DE" name="start_date" value="{{ event.start_time|date:'Y-m-d' }}" class="form-control bg-body-tertiary border-0" required>
+      </div>
+      <div class="col-12 col-sm-6">
+        <label class="form-label text-muted small fw-bold">STARTZEIT</label>
+        <input type="time" name="start_time" value="{{ event.start_time|time:'H:i' }}" class="form-control bg-body-tertiary border-0" required>
+      </div>
+      <div class="col-12 col-sm-6">
+        <label class="form-label text-muted small fw-bold">ENDDATUM</label>
+        <input type="date" lang="de-DE" name="end_date" value="{{ event.end_time|date:'Y-m-d' }}" class="form-control bg-body-tertiary border-0" required>
+      </div>
+      <div class="col-12 col-sm-6">
+        <label class="form-label text-muted small fw-bold">ENDZEIT</label>
+        <input type="time" name="end_time" value="{{ event.end_time|time:'H:i' }}" class="form-control bg-body-tertiary border-0" required>
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label text-muted small fw-bold">KATEGORIE</label>
+      <select name="category" class="form-select bg-body-tertiary border-0">
+        <option value="">Keine Kategorie</option>
+        {% for category in categories %}
+          <option value="{{ category.id }}" {% if event.category_id == category.id %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label text-muted small fw-bold">NOTIZEN / BESCHREIBUNG</label>
+      <textarea name="description" class="form-control bg-body-tertiary border-0" rows="3">{{ event.description }}</textarea>
+    </div>
+
+    <div class="d-flex justify-content-between mt-4 border-top pt-3">
+      <button type="submit" name="action" value="delete" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Löschen</button>
+      <button type="submit" name="action" value="save" class="btn btn-primary rounded-pill px-4 fw-bold">Speichern</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

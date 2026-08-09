@@ -9,7 +9,7 @@
       <span class="node-name" contenteditable="false">{{ node.name }}</span>
     </a>
 
-    <!-- Actions (Create + Delete) -->
+    <!-- Actions (Create + Move + Delete) -->
     <div class="d-flex gap-2 px-1 align-items-center">
       <button type="button" class="btn btn-link p-0 text-muted text-decoration-none create-child-btn" data-id="{{ node.id }}" data-type="file" title="Neue Notiz hier">
         <i class="bi bi-file-earmark-plus"></i>
@@ -17,6 +17,22 @@
       <button type="button" class="btn btn-link p-0 text-muted text-decoration-none create-child-btn" data-id="{{ node.id }}" data-type="folder" title="Neuer Unterordner hier">
         <i class="bi bi-folder-plus"></i>
       </button>
+
+      <!-- NEW: Move (tap-friendly alternative to drag & drop) -->
+      <div class="dropdown">
+        <button class="btn btn-link p-0 text-muted text-decoration-none" type="button" data-bs-toggle="dropdown" data-bs-strategy="fixed" title="Verschieben">
+          <i class="bi bi-arrows-move"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end move-menu">
+          <li><a class="dropdown-item move-target" href="#" data-item-id="{{ node.id }}" data-parent-id="">Root Verzeichnis</a></li>
+          {% for folder in all_folders %}
+            {% if folder.id != node.id %}
+              <li><a class="dropdown-item move-target" href="#" data-item-id="{{ node.id }}" data-parent-id="{{ folder.id }}">{{ folder.label }}</a></li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
       <!-- NEW: Delete Directory Button -->
       <button type="button" class="btn btn-link p-0 text-danger text-decoration-none delete-item-btn" data-id="{{ node.id }}" data-name="{{ node.name }}" title="Ordner löschen">
         <i class="bi bi-trash"></i>
@@ -37,10 +53,10 @@
 {% elif node.type == 'file' %}
 <!-- FILE -->
 <div class="tree-node" data-id="{{ node.id }}" data-type="file">
-  <a href="{% url 'knowledge:note_detail' node.id %}" class="list-group-item list-group-item-action border-0 py-2 d-flex align-items-center gap-2
+  <div class="list-group-item list-group-item-action border-0 py-2 d-flex justify-content-between align-items-center
     {% if node.is_active %}bg-body border-start border-primary border-4 active-note{% else %}bg-transparent text-body{% endif %}">
-    
-    <div class="d-flex align-items-center gap-2
+
+    <a href="{% url 'knowledge:note_detail' node.id %}" class="text-decoration-none text-reset d-flex align-items-center gap-2 flex-grow-1
       {% if level == 2 and not node.is_active %}ps-4
       {% elif level == 2 and node.is_active %}ps-3 ms-1
       {% elif level == 3 and not node.is_active %}ps-5
@@ -49,10 +65,23 @@
       {% elif level == 4 and node.is_active %}ps-5 ms-2
       {% elif level >= 5 and not node.is_active %}ps-5 ms-4
       {% elif level >= 5 and node.is_active %}ps-5 ms-3{% endif %}">
-      
-      <i class="bi bi-file-earmark-text {% if node.is_active %}text-primary{% else %}text-muted{% endif %}"></i> 
+
+      <i class="bi bi-file-earmark-text {% if node.is_active %}text-primary{% else %}text-muted{% endif %}"></i>
       <span class="node-name {% if node.is_active %}fw-bold{% endif %}" contenteditable="false">{{ node.name }}</span>
+    </a>
+
+    <!-- NEW: Move (tap-friendly alternative to drag & drop) -->
+    <div class="dropdown px-1">
+      <button class="btn btn-link p-0 text-muted text-decoration-none" type="button" data-bs-toggle="dropdown" data-bs-strategy="fixed" title="Verschieben">
+        <i class="bi bi-arrows-move"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-end move-menu">
+        <li><a class="dropdown-item move-target" href="#" data-item-id="{{ node.id }}" data-parent-id="">Root Verzeichnis</a></li>
+        {% for folder in all_folders %}
+          <li><a class="dropdown-item move-target" href="#" data-item-id="{{ node.id }}" data-parent-id="{{ folder.id }}">{{ folder.label }}</a></li>
+        {% endfor %}
+      </ul>
     </div>
-  </a>
+  </div>
 </div>
 {% endif %}

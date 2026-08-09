@@ -13,6 +13,15 @@ class CalendarItem:
     color: str = '#6c757d'
     url: str = ''
     source_key: str = ''
+    subgroup_key: str = ''
+    description: str = ''
+
+
+@dataclass
+class CalendarSubgroup:
+    key: str
+    label: str
+    color: str = '#6c757d'
 
 
 class CalendarSource(Protocol):
@@ -34,3 +43,7 @@ def get_all_items(start: date, end: date, user) -> list[CalendarItem]:
 
 def get_sources() -> list[CalendarSource]:
     return list(_registry)
+
+def get_source_subgroups(source: CalendarSource) -> list[CalendarSubgroup]:
+    getter = getattr(source, 'get_subgroups', None)
+    return getter() if getter else []

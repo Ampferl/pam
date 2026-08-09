@@ -5,7 +5,7 @@ from planner.utils import get_upcoming_events
 
 @login_required
 def index_view(request):
-    upcoming = get_upcoming_events(limit=3)
+    upcoming = get_upcoming_events(request.user, limit=3)
 
     context = {
         'upcoming_events': upcoming,

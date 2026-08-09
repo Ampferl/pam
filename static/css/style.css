@@ -356,3 +356,9 @@ resize-none {
   background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
   border-radius: var(--radius-lg);
 }
+
+/* "Move to..." dropdown - tap-friendly alternative to drag & drop */
+.move-menu {
+  max-height: 250px;
+  overflow-y: auto;
+}

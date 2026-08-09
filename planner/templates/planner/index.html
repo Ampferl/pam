@@ -4,13 +4,16 @@
 {% block content %}
 <div id="view-calendar" class="spa-view">
 
-    <div class="d-flex align-items-center mb-2">
-      <h3 class="fw-bold fs-4 fs-md-3">
-        {% if active_view == 'month' %}{{ month_title }}{% endif %}
-        {% if active_view == 'week' %}{{ week_title }}{% endif %}
-        {% if active_view == 'day' %}{{ day_title }}{% endif %}
-      </h3>
-    </div>
+  <div class="d-flex justify-content-between mb-2">
+    <h3 class="fw-bold fs-4 fs-md-3">
+      {% if active_view == 'month' %}{{ month_title }}{% endif %}
+      {% if active_view == 'week' %}{{ week_title }}{% endif %}
+      {% if active_view == 'day' %}{{ day_title }}{% endif %}
+    </h3>
+    <button class="btn btn-primary rounded-pill px-2" data-bs-toggle="modal"data-bs-target="#eventModal">
+      <i class="bi bi-calendar-plus p-2"></i> 
+    </button>
+  </div>
   <div class="d-flex justify-content-between align-items-center mb-3 mb-md-4">
     <div class="btn-group bg-body-tertiary p-1 rounded-pill d-none d-md-flex">
       <a href="?date={{ target_date }}&view=month" class="btn btn-sm border-0 rounded-pill px-4 {% if active_view == 'month' %}btn-primary{% else %}btn-outline-primary text-body{% endif %}">Monat</a>
@@ -31,17 +34,43 @@
     </div>
 
     <div class="dropdown d-md-none">
-      <button class="btn btn-outline-primary btn-sm rounded-pill dropdown-toggle" type="button" data-bs-toggle="dropdown">Ansicht</button>
+      <button class="btn btn-outline-primary btn-sm rounded-pill dropdown-toggle" type="button"data-bs-toggle="dropdown">Ansicht</button>
       <ul class="dropdown-menu">
-        <li><a class="dropdown-item {% if active_view == 'month' %}active{% endif %}" href="?date={{ target_date }}&view=month">Monat</a></li>
+        <li><a class="dropdown-item {% if active_view == 'month' %}active{% endif %}" href="?date={{target_date }}&view=month">Monat</a></li>
         <li><a class="dropdown-item {% if active_view == 'week' %}active{% endif %}" href="?date={{ target_date }}&view=week">Woche</a></li>
         <li><a class="dropdown-item {% if active_view == 'day' %}active{% endif %}" href="?date={{ target_date }}&view=day">Tag</a></li>
       </ul>
     </div>
 
-    <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#eventModal">
-      <i class="bi bi-calendar-plus me-2"></i>
-    </button>
+    <div class="dropdown pe-4">
+      <button class="btn btn-outline-secondary rounded-pill px-2" type="button" data-bs-toggle="dropdown">
+        <i class="bi bi-layers p-2"></i>
+      </button>
+      <div class="dropdown-menu p-3" style="min-width: 220px; max-height: 320px; overflow-y: auto;">
+        {% for source in calendar_sources %}
+        <div class="form-check mb-1">
+          <input class="form-check-input source-toggle" type="checkbox" checked
+                                                        id="src-{{ source.key }}" data-source-key="{{ source.key }}">
+          <label class="form-check-label fw-bold" for="src-{{ source.key }}">{{ source.label }}</label>
+        </div>
+        {% if source.subgroups %}
+        <div class="ms-4 mb-2">
+          {% for sub in source.subgroups %}
+          <div class="form-check">
+            <input class="form-check-input subgroup-toggle" type="checkbox" checked
+                                                            id="sub-{{ source.key }}-{{ sub.key }}"
+                                                            data-source-key="{{ source.key }}" data-subgroup-key="{{ sub.key }}">
+            <label class="form-check-label" for="sub-{{ source.key }}-{{ sub.key }}">
+              <span class="d-inline-block rounded-circle me-1"style="width:8px;height:8px;background-color:{{ sub.color }};"></span>
+              {{ sub.label }}
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endfor %}
+      </div>
+    </div>
   </div>
 
   <div class="card p-2 p-md-4 overflow-hidden">
@@ -52,39 +81,35 @@
       </div>
       <div class="calendar-grid">
         {% for day_data in calendar_month_grid %}
-          <!-- Changed back to a <div> so events can be clicked independently -->
-          <div class="calendar-day 
-            {% if not day_data.is_current_month %}text-muted opacity-50{% else %}text-body{% endif %} 
-            {% if day_data.is_today %}fw-bold border-primary bg-primary bg-opacity-10{% endif %}">
-            
-            <!-- The link to the Day view is now ONLY on the number itself -->
-            <a href="?date={{ day_data.date|date:'Y-m-d' }}&view=day" 
-               class="text-decoration-none d-block mb-1 {% if day_data.is_today %}text-primary{% else %}text-reset{% endif %}">
-              {{ day_data.date.day }}
-            </a>
-            
-            {% for event in day_data.events %}
-              <!-- The Event Div (Triggers Modal) -->
-              <div class="cal-event mt-1 px-1 rounded text-truncate small" 
-                   style="background-color: {{ event.obj.category.color_hex|default:'#0d6efd' }}; color: #fff; cursor: pointer;"
-                   
-                   data-bs-toggle="modal" 
-                   data-bs-target="#editEventModal"
-                   
-                   data-id="{{ event.obj.id }}"
-                   data-title="{{ event.obj.title }}"
-                   data-startdate="{{ event.obj.start_time|date:'Y-m-d' }}"
-                   data-starttime="{{ event.obj.start_time|time:'H:i' }}"
-                   data-enddate="{{ event.obj.end_time|date:'Y-m-d' }}"
-                   data-endtime="{{ event.obj.end_time|time:'H:i' }}"
-                   data-category="{{ event.obj.category.id|default:'' }}"
-                   data-description="{{ event.obj.description|default:'' }}">
-                
-                {{ event.obj.start_time|date:"H:i" }} {{ event.obj.title }}
-              </div>
-            {% endfor %}
-            
+        <div class="calendar-day
+                    {% if not day_data.is_current_month %}text-muted opacity-50{% else %}text-body{% endif %}
+                    {% if day_data.is_today %}fw-bold border-primary bg-primary bg-opacity-10{% endif %}" data-date="{{ day_data.date|date:'Y-m-d' }}">
+
+          <a href="?date={{ day_data.date|date:'Y-m-d' }}&view=day"
+             class="text-decoration-none d-block mb-1 {% if day_data.is_today %}text-primary{% else %}text-reset{% endif %}">
+            {{ day_data.date.day }}
+          </a>
+
+          {% for item in day_data.allday_events %}
+          <div class="cal-event cal-event-allday mt-1 px-1 rounded text-truncate small"
+               data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
+                                                   style="background-color: {{ item.color|default:'#0d6efd' }}; color:#fff;"
+                                                   onclick="window.location='{{ item.url }}'">
+            {{ item.title }}
           </div>
+          {% endfor %}
+          {% for entry in day_data.events %}
+          {% with item=entry.item %}
+          <div class="cal-event mt-1 px-1 rounded text-truncate small"
+               data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
+                                                   style="background-color: {{ item.color|default:'#0d6efd' }}; color: #fff; cursor:pointer;"
+                                                   onclick="window.location='{{ item.url }}'">
+            {{ item.start_time|date:"H:i" }} {{ item.title }}
+          </div>
+          {% endwith %}
+          {% endfor %}
+
+        </div>
         {% endfor %}
       </div>
     </div>
@@ -95,104 +120,113 @@
         <div class="d-flex text-center fw-bold text-muted mb-2 small align-items-end pb-2">
           <div class="w-50px"></div>
           {% for day_data in calendar_week_grid %}
-            <a href="?date={{ day_data.date|date:'Y-m-d' }}&view=day" class="flex-grow-1 text-decoration-none {% if day_data.is_today %}text-primary{% else %}text-muted{% endif %}">
-              {{ day_data.date|date:"D"|upper }} <br>
-              <span class="fs-4 {% if not day_data.is_today %}text-body{% endif %}">{{ day_data.date.day }}</span>
-            </a>
+          <a href="?date={{ day_data.date|date:'Y-m-d' }}&view=day" class="flex-grow-1 text-decoration-none {% if day_data.is_today %}text-primary{% else %}text-muted{% endif %}">
+            {{ day_data.date|date:"D"|upper }} <br>
+            <span class="fs-4 {% if not day_data.is_today %}text-body{% endif %}">{{ day_data.date.day }}</span>
+          </a>
+          {% endfor %}
+        </div>
+
+        <div class="d-flex border-bottom border-secondary-subtle pb-2 mb-2">
+          <div class="w-50px"></div>
+          {% for day_data in calendar_week_grid %}
+          <div class="flex-grow-1 px-1">
+            {% for item in day_data.allday_events %}
+            <div class="cal-event-allday rounded text-truncate small px-1 mb-1"
+                 data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
+                                                     style="background-color: {{ item.color|default:'#0d6efd' }}; color: #fff; cursor:pointer;"
+                                                     onclick="window.location='{{ item.url }}'">
+              {{ item.title }}
+            </div>
+            {% endfor %}
+          </div>
           {% endfor %}
         </div>
 
         <div class="d-flex position-relative border-top border-secondary-subtle">
           <div class="text-end pe-2 text-muted small pt-2 w-50px border-end border-secondary-subtle" style="position: relative;">
             {% for i in "x"|rjust:"24" %}
-              <div class="cal-time-slot" style="height: 60px;">{{ forloop.counter|add:"-1"|stringformat:"02d" }}:00</div>
+            <div class="cal-time-slot" style="height: 60px;">{{ forloop.counter|add:"-1"|stringformat:"02d" }}:00</div>
             {% endfor %}
           </div>
 
           {% for day_data in calendar_week_grid %}
-            <div class="cal-day-column flex-grow-1 border-end border-secondary-subtle position-relative {% if day_data.is_today %}bg-primary bg-opacity-10{% endif %}" data-date="{{ day_data.date|date:'Y-m-d' }}">
-              {% if day_data.is_today %}
-                <div class="current-time-line position-absolute w-100" style="z-index: 20; display: none;">
-                  <div class="position-relative">
-                    <div class="border-top border-danger border-2 position-absolute w-100" style="top: 0;"></div>
-                    <div class="bg-danger rounded-circle position-absolute" style="width: 10px; height: 10px; left: -5px; top: -4px;"></div>
-                  </div>
-                </div>
-              {% endif %}
-
-              {% for i in "x"|rjust:"24" %}
-                <div class="cal-grid-line border-bottom border-secondary-subtle" style="height: 60px;"></div>
-              {% endfor %}
-
-              {% for event in day_data.events %}
-                <div class="cal-event-abs position-absolute w-100 rounded p-1 text-white overflow-hidden shadow-sm" 
-                     style="top: {{ event.top_px }}px; height: {{ event.height_px }}px; background-color: {{ event.obj.category.color_hex|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
-                     data-bs-toggle="modal" 
-                     data-bs-target="#editEventModal"
-
-                     data-id="{{ event.obj.id }}"
-                     data-title="{{ event.obj.title }}"
-                     data-startdate="{{ event.obj.start_time|date:'Y-m-d' }}"
-                     data-starttime="{{ event.obj.start_time|time:'H:i' }}"
-                     data-enddate="{{ event.obj.end_time|date:'Y-m-d' }}"
-                     data-endtime="{{ event.obj.end_time|time:'H:i' }}"
-                     data-category="{{ event.obj.category.id|default:'' }}"
-                     data-description="{{ event.obj.description|default:'' }}">
-                  <div class="resize-handle resize-handle-top position-absolute w-100" style="top: 0; left: 0; height: 8px; cursor: ns-resize; z-index: 20;"></div>
-                  <strong class="d-block small lh-1">{{ event.obj.title }}</strong>
-                  <span class="small pointer-events-none time-label">{{ event.obj.start_time|date:"H:i" }}</span>
-                  <div class="resize-handle resize-handle-bottom position-absolute w-100" style="bottom: 0; left: 0; height: 8px; cursor: ns-resize; z-index: 20;"></div>
-                </div>
-              {% endfor %}
+          <div class="cal-day-column flex-grow-1 border-end border-secondary-subtle position-relative {% if day_data.is_today %}bg-primary bg-opacity-10{% endif %}" data-date="{{ day_data.date|date:'Y-m-d' }}">
+            {% if day_data.is_today %}
+            <div class="current-time-line position-absolute w-100" style="z-index: 20; display:none;">
+              <div class="position-relative">
+                <div class="border-top border-danger border-2 position-absolute w-100" style="top: 0;"></div>
+                <div class="bg-danger rounded-circle position-absolute" style="width: 10px; height: 10px; left: -5px; top: -4px;"></div>
+              </div>
             </div>
+            {% endif %}
+
+            {% for i in "x"|rjust:"24" %}
+            <div class="cal-grid-line border-bottom border-secondary-subtle" style="height:60px;"></div>
+            {% endfor %}
+
+            {% for entry in day_data.events %}
+            {% with item=entry.item %}
+            <div class="cal-event-abs position-absolute w-100 rounded p-1 text-whiteoverflow-hidden shadow-sm"
+                 data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
+                                                     style="top: {{ entry.top_px }}px; height: {{ entry.height_px }}px; background-color: {{ item.color|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
+                                                     onclick="window.location='{{ item.url }}'">
+              <strong class="d-block small lh-1">{{ item.title }}</strong>
+              <span class="small pointer-events-none time-label">{{ item.start_time|date:"H:i" }}</span>
+            </div>
+            {% endwith %}
+            {% endfor %}
+          </div>
           {% endfor %}
         </div>
       </div>
     </div>
 
     <div id="cal-view-day" class="{% if active_view == 'day' %}d-block{% else %}d-none{% endif %}">
+      <div class="border-bottom border-secondary-subtle pb-2 mb-2">
+        {% for item in day_allday_events %}
+        <div class="cal-event-allday rounded text-truncate small px-2 py-1 mb-1 d-inline-block me-1"
+             data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
+                                                 style="background-color: {{ item.color|default:'#0d6efd' }}; color: #fff; cursor: pointer;"
+                                                 onclick="window.location='{{ item.url }}'">
+          {{ item.title }}
+        </div>
+        {% endfor %}
+      </div>
       <div class="d-flex position-relative border-top border-secondary-subtle mt-3">
         <div class="text-end pe-2 text-muted small pt-2 w-50px border-end border-secondary-subtle">
           {% for i in "x"|rjust:"24" %}
-            <div class="cal-time-slot" style="height: 60px;">{{ forloop.counter|add:"-1"|stringformat:"02d" }}:00</div>
+          <div class="cal-time-slot" style="height: 60px;">{{ forloop.counter|add:"-1"|stringformat:"02d" }}:00</div>
           {% endfor %}
         </div>
 
         <div class="cal-day-column flex-grow-1 position-relative {% if target_day_is_today %}bg-primary bg-opacity-10{% endif %}" data-date="{{ target_date }}">
           {% if target_day_is_today %}
-            <div class="current-time-line position-absolute w-100" style="z-index: 20; display: none;">
-              <div class="position-relative">
-                <div class="border-top border-danger border-2 position-absolute w-100" style="top: 0;"></div>
-                <div class="bg-danger rounded-circle position-absolute" style="width: 10px; height: 10px; left: -5px; top: -4px;"></div>
-              </div>
+          <div class="current-time-line position-absolute w-100" style="z-index: 20; display: none;">
+            <div class="position-relative">
+              <div class="border-top border-danger border-2 position-absolute w-100" style="top:0;"></div>
+              <div class="bg-danger rounded-circle position-absolute" style="width: 10px; height: 10px; left: -5px; top: -4px;"></div>
             </div>
+          </div>
           {% endif %}
 
           {% for i in "x"|rjust:"24" %}
-            <div class="cal-grid-line border-bottom border-secondary-subtle" style="height: 60px;"></div>
+          <div class="cal-grid-line border-bottom border-secondary-subtle" style="height: 60px;"></div>
           {% endfor %}
 
-          {% for event in day_events %}
-            <div class="cal-event-abs position-absolute w-100 rounded p-2 text-white overflow-hidden shadow-sm" 
-                 style="top: {{ event.top_px }}px; height: {{ event.height_px }}px; background-color: {{ event.obj.category.color_hex|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
-                 data-bs-toggle="modal" 
-                 data-bs-target="#editEventModal"
-
-                 data-id="{{ event.obj.id }}"
-                 data-title="{{ event.obj.title }}"
-                 data-startdate="{{ event.obj.start_time|date:'Y-m-d' }}"
-                 data-starttime="{{ event.obj.start_time|time:'H:i' }}"
-                 data-enddate="{{ event.obj.end_time|date:'Y-m-d' }}"
-                 data-endtime="{{ event.obj.end_time|time:'H:i' }}"
-                 data-category="{{ event.obj.category.id|default:'' }}"
-                 data-description="{{ event.obj.description|default:'' }}">
-              <div class="resize-handle resize-handle-top position-absolute w-100" style="top: 0; left: 0; height: 8px; cursor: ns-resize; z-index: 20;"></div>
-              <strong class="d-block">{{ event.obj.title }}</strong>
-              <span class="small pointer-events-none time-label">{{ event.obj.start_time|date:"H:i" }} - {{ event.obj.end_time|date:"H:i" }}</span><br>
-              <span class="small opacity-75">{{ event.obj.description }}</span>
-              <div class="resize-handle resize-handle-bottom position-absolute w-100" style="bottom: 0; left: 0; height: 8px; cursor: ns-resize; z-index: 20;"></div>
-            </div>
+          {% for entry in day_events %}
+          {% with item=entry.item %}
+          <div class="cal-event-abs position-absolute w-100 rounded p-2 text-white overflow-hidden shadow-sm"
+               data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
+                                                   style="top: {{ entry.top_px }}px; height: {{ entry.height_px }}px; background-color: {{item.color|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
+                                                   onclick="window.location='{{ item.url }}'">
+            <strong class="d-block">{{ item.title }}</strong>
+            <span class="small pointer-events-none time-label">{{ item.start_time|date:"H:i" }} - {{ item.end_time|date:"H:i" }}</span><br>
+            <span class="small opacity-75">{{ item.description }}</span>
+          </div>
+          {% endwith %}
           {% endfor %}
+
         </div>
       </div>
     </div>
@@ -200,7 +234,7 @@
   </div>
 </div>
 
-<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel" aria-hidden="true">
+<div class="modal fade" id="eventModal" tabindex="-1" aria-labelledby="eventModalLabel"aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-lg">
 
@@ -241,7 +275,7 @@
             <select name="category" class="form-select bg-body-tertiary border-0">
               <option value="">Keine Kategorie</option>
               {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
+              <option value="{{ category.id }}">{{ category.name }}</option>
               {% endfor %}
             </select>
           </div>
@@ -262,74 +296,6 @@
   </div>
 </div>
 
-<!-- SHOW / EDIT EVENT MODAL -->
-<div class="modal fade" id="editEventModal" tabindex="-1" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0 shadow-lg">
-
-      <div class="modal-header border-bottom-0 pb-0">
-        <h1 class="modal-title fs-4 fw-bold">Event bearbeiten</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body p-4">
-        <!-- The action URL will be set dynamically via JS based on the clicked event -->
-        <form id="editEventForm" method="POST" action="">
-          {% csrf_token %}
-          
-          <div class="mb-3">
-            <label class="form-label text-muted small fw-bold">TITEL</label>
-            <input type="text" id="editTitle" name="title" class="form-control form-control-lg bg-body-tertiary border-0" required>
-          </div>
-
-          <div class="row g-3 mb-3">
-            <div class="col-12 col-sm-6">
-              <label class="form-label text-muted small fw-bold">STARTDATUM</label>
-              <input type="date" lang="de-DE" id="editStartDate" name="start_date" class="form-control bg-body-tertiary border-0" required>
-            </div>
-            <div class="col-12 col-sm-6">
-              <label class="form-label text-muted small fw-bold">STARTZEIT</label>
-              <input type="time" id="editStartTime" name="start_time" class="form-control bg-body-tertiary border-0" required>
-            </div>
-            <div class="col-12 col-sm-6">
-              <label class="form-label text-muted small fw-bold">ENDDATUM</label>
-              <input type="date" lang="de-DE" id="editEndDate" name="end_date" class="form-control bg-body-tertiary border-0" required>
-            </div>
-            <div class="col-12 col-sm-6">
-              <label class="form-label text-muted small fw-bold">ENDZEIT</label>
-              <input type="time" id="editEndTime" name="end_time" class="form-control bg-body-tertiary border-0" required>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label text-muted small fw-bold">KATEGORIE</label>
-            <select id="editCategory" name="category" class="form-select bg-body-tertiary border-0">
-              <option value="">Keine Kategorie</option>
-              {% for category in categories %}
-                <option value="{{ category.id }}">{{ category.name }}</option>
-              {% endfor %}
-            </select>
-          </div>
-
-          <div class="mb-4">
-            <label class="form-label text-muted small fw-bold">NOTIZEN / BESCHREIBUNG</label>
-            <textarea id="editDescription" name="description" class="form-control bg-body-tertiary border-0" rows="3"></textarea>
-          </div>
-
-          <div class="d-flex justify-content-between mt-4 border-top pt-3">
-            <!-- Delete Button passes a specific value to the view -->
-            <button type="submit" name="action" value="delete" class="btn btn-outline-danger rounded-pill px-4 fw-bold">Löschen</button>
-            <div class="d-flex gap-2">
-              <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" data-bs-dismiss="modal">Abbrechen</button>
-              <button type="submit" name="action" value="save" class="btn btn-primary rounded-pill px-4 fw-bold">Speichern</button>
-            </div>
-          </div>
-        </form>
-      </div>
-
-    </div>
-  </div>
-</div>
 {% endblock %}
 
 {% block headers %}
@@ -337,4 +303,5 @@
 {% endblock %}
 {% block scripts %}
 <script src="{% static 'planner/js/calendar.js' %}"></script>
+<script src="{% static 'planner/js/calendar_filters.js' %}"></script>
 {% endblock %}
