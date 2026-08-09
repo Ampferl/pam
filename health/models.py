@@ -8,6 +8,7 @@ class DailyStats(models.Model):
     resting_heart_rate = models.PositiveSmallIntegerField(null=True, blank=True)
     sleep_seconds = models.PositiveIntegerField(null=True, blank=True)
     weight_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    body_fat_percentage = models.DecimalField(max_digits=4, decimal_places=1, null=True, blank=True)
 
     synced_at = models.DateTimeField(auto_now=True)
 
@@ -37,3 +38,11 @@ class Activity(models.Model):
 
     def __str__(self):
         return f"{self.name} ({self.start_time.date()})"
+
+    @property
+    def duration_minutes(self):
+        return round(self.duration_seconds / 60)
+
+    @property
+    def distance_km(self):
+        return round(self.distance_m / 1000, 2) if self.distance_m else None

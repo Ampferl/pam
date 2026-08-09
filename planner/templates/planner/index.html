@@ -167,7 +167,7 @@
 
             {% for entry in day_data.events %}
             {% with item=entry.item %}
-            <div class="cal-event-abs position-absolute w-100 rounded p-1 text-whiteoverflow-hidden shadow-sm"
+            <div class="cal-event-abs position-absolute w-100 rounded p-1 text-white overflow-hidden shadow-sm"
                  data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
                                                      style="top: {{ entry.top_px }}px; height: {{ entry.height_px }}px; background-color: {{ item.color|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
                                                      onclick="window.location='{{ item.url }}'">

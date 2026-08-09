@@ -1,41 +1,83 @@
 {% extends "dashboard.html" %}
+{% load static %}
 {% block content %}
 <div>
   {% if messages %}
-  {% for message in messages %}
-  <div class="alert alert-{{ message.tags }} rounded-4">{{ message }}</div>
-  {% endfor %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} rounded-4">{{ message }}</div>
+    {% endfor %}
   {% endif %}
+
   <div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h6 class="fw-bold text-muted mb-1">Garmin Connect</h6>
-    {% if latest_stats %}
-      <p class="mb-0 small text-muted">
-        Letzter Sync: {{ latest_stats.date }} ·
-        {{ latest_stats.steps|default:"–" }} Schritte ·
-        {{ latest_stats.resting_heart_rate|default:"–" }} bpm Ruhepuls ·
-        {{ latest_stats.sleep_hours|default:"–" }} h Schlaf
-        {% if latest_stats.weight_kg %} · {{ latest_stats.weight_kg }} kg{% endif %}
-      </p>
-    {% else %}
-      <p class="mb-0 small text-muted">Noch keine Daten synchronisiert.</p>
-    {% endif %}
+    <div>
+      <h2 class="fw-bold tracking-tight mb-1">Aktivitäts-Übersicht</h2>
+      {% if latest_stats %}
+        <p class="mb-0 small text-muted">Letzter Sync: {{ latest_stats.date }}</p>
+      {% else %}
+        <p class="mb-0 small text-muted">Noch keine Daten synchronisiert.</p>
+      {% endif %}
+    </div>
+    <form method="POST" action="{% url 'health:garmin_sync' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-primary rounded-pill px-4">
+        <i class="bi bi-arrow-repeat me-1"></i> Sync
+      </button>
+    </form>
   </div>
-  <form method="POST" action="{% url 'health:garmin_sync' %}">
-    {% csrf_token %}
-    <button type="submit" class="btn btn-outline-primary rounded-pill px-4">
-      <i class="bi bi-arrow-repeat me-1"></i> Sync
-    </button>
-  </form>
-</div>
-  <h2 class="fw-bold tracking-tight mb-4">Aktivitäts-Übersicht</h2>
+
+  <!-- Quick Stats -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3 d-flex align-items-center gap-3">
+          <div class="icon-box bg-primary text-white"><i class="bi bi-shoe-prints"></i></div>
+          <div>
+            <div class="fs-5 fw-bold">{{ latest_stats.steps|default:"–" }}</div>
+            <div class="small text-muted">Schritte</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3 d-flex align-items-center gap-3">
+          <div class="icon-box bg-danger text-white"><i class="bi bi-heart-pulse"></i></div>
+          <div>
+            <div class="fs-5 fw-bold">{{ latest_stats.resting_heart_rate|default:"–" }}</div>
+            <div class="small text-muted">Ruhepuls (bpm)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3 d-flex align-items-center gap-3">
+          <div class="icon-box bg-info text-white"><i class="bi bi-moon-stars"></i></div>
+          <div>
+            <div class="fs-5 fw-bold">{{ latest_stats.sleep_hours|default:"–" }} h</div>
+            <div class="small text-muted">Schlaf</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-3 d-flex align-items-center gap-3">
+          <div class="icon-box bg-warning text-white"><i class="bi bi-speedometer2"></i></div>
+          <div>
+            <div class="fs-5 fw-bold">{{ latest_stats.weight_kg|default:"–" }} kg</div>
+            <div class="small text-muted">Gewicht</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <div class="row g-4 mb-4">
     <div class="col-12 col-lg-8">
       <div class="card border-0 shadow-sm">
         <div class="card-body p-4">
-          <h6 class="fw-bold text-muted mb-4">Produktivität & Habits (Letzte 7 Tage)</h6>
-          <!-- Chart Canvas -->
+          <h6 class="fw-bold text-muted mb-4">Schritte (Letzte 7 Tage)</h6>
           <canvas id="activityChart" height="100"></canvas>
         </div>
       </div>
@@ -43,36 +85,29 @@
     <div class="col-12 col-lg-4">
       <div class="card border-0 shadow-sm h-100 bg-body-tertiary">
         <div class="card-body p-4">
-          <h6 class="fw-bold mb-4">Zusammenfassung</h6>
-
-          <div class="mb-4">
-            <div class="d-flex justify-content-between mb-1">
-              <span class="small fw-medium">Aufgaben Erledigt</span>
-              <span class="small fw-bold">85%</span>
+          <h6 class="fw-bold mb-4">Letzte Aktivitäten</h6>
+          {% if recent_activities %}
+            <div class="d-flex flex-column gap-3">
+              {% for activity in recent_activities %}
+                <div class="d-flex align-items-center">
+                  <div class="icon-box bg-primary text-white me-3"><i class="bi bi-lightning-charge"></i></div>
+                  <div class="flex-grow-1">
+                    <h6 class="mb-0 fw-bold small">{{ activity.name }}</h6>
+                    <small class="text-muted">
+                      {{ activity.start_time|date:"d.m." }} · {{ activity.duration_minutes }} Min
+                      {% if activity.distance_km %} · {{ activity.distance_km }} km{% endif %}
+                    </small>
+                  </div>
+                </div>
+              {% endfor %}
             </div>
-            <div class="progress" style="height: 8px;">
-              <div class="progress-bar bg-primary" style="width: 85%"></div>
-            </div>
-          </div>
-
-          <div class="mb-4">
-            <div class="d-flex justify-content-between mb-1">
-              <span class="small fw-medium">Workout Konsistenz</span>
-              <span class="small fw-bold">100%</span>
-            </div>
-            <div class="progress" style="height: 8px;">
-              <div class="progress-bar bg-success" style="width: 100%"></div>
-            </div>
-          </div>
-
-          <div class="alert alert-primary bg-primary-subtle border-0 rounded-4 mt-auto mb-0">
-            <i class="bi bi-stars me-2"></i> Du bist diese Woche <strong>20% produktiver</strong> als letzte Woche! Weiter so!
-          </div>
+          {% else %}
+            <p class="text-muted small mb-0">Noch keine Aktivitäten synchronisiert.</p>
+          {% endif %}
         </div>
       </div>
     </div>
   </div>
-
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold tracking-tight mb-0">Trainingsplan</h2>
@@ -117,13 +152,10 @@
           <h6 class="fw-bold mb-4">Körperdatenbank</h6>
           <ul class="list-group list-group-flush bg-transparent">
             <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
-              Gewicht <span class="fw-bold">82.5 kg</span>
+              Gewicht <span class="fw-bold">{{ latest_stats.weight_kg|default:"–" }} kg</span>
             </li>
             <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
-              KFA <span class="fw-bold">14%</span>
-            </li>
-            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
-              Bankdrücken (1RM) <span class="fw-bold">100 kg</span>
+              Körperfett <span class="fw-bold">{{ latest_stats.body_fat_percentage|default:"–" }}%</span>
             </li>
           </ul>
         </div>
@@ -133,42 +165,41 @@
 </div>
 
 {% endblock %}
+
 {% block scripts %}
+<script src="{% static 'chartjs/chart.umd.min.js' %}"></script>
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    initChart();
+  });
+
   function initChart() {
-    if(window.myChart) return;
+    if (window.myChart) return;
     const ctx = document.getElementById('activityChart').getContext('2d');
 
-    // Hole aktuelle Farben
-    const theme = htmlElement.getAttribute('data-bs-theme');
+    const theme = document.documentElement.getAttribute('data-bs-theme');
     const textColor = theme === 'dark' ? '#94a3b8' : '#64748b';
     const gridColor = theme === 'dark' ? '#334155' : '#e2e8f0';
 
-    // Aktuelle Akzentfarbe
     const primRgb = localStorage.getItem('accentColorRgb') || '99, 102, 241';
-    const primHex = localStorage.getItem('accentColorHex') || '#6366f1';
 
     window.myChart = new Chart(ctx, {
-      type: 'line',
+      type: 'bar',
       data: {
-        labels: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+        labels: {{ chart_labels|safe }},
         datasets: [{
-          label: 'Productivity Score',
-          data: [65, 78, 90, 81, 86, 55, 40],
-          backgroundColor: `rgba(${primRgb}, 0.15)`,
-          borderColor: primHex,
-          borderWidth: 3,
-          pointBackgroundColor: primHex,
-          pointRadius: 4,
-          fill: true,
-          tension: 0.4 // Abgerundete Kurve
+          label: 'Schritte',
+          data: {{ chart_steps|safe }},
+          backgroundColor: `rgba(${primRgb}, 0.6)`,
+          borderRadius: 4,
+          maxBarThickness: 32
         }]
       },
       options: {
         responsive: true,
         plugins: { legend: { display: false } },
         scales: {
-          y: { grid: { color: gridColor }, ticks: { color: textColor } },
+          y: { grid: { color: gridColor }, ticks: { color: textColor }, beginAtZero: true },
           x: { grid: { display: false }, ticks: { color: textColor } }
         }
       }
@@ -176,6 +207,7 @@
   }
 
   function updateChartTheme(theme) {
+    if (!window.myChart) return;
     const textColor = theme === 'dark' ? '#94a3b8' : '#64748b';
     const gridColor = theme === 'dark' ? '#334155' : '#e2e8f0';
     window.myChart.options.scales.y.grid.color = gridColor;
@@ -184,4 +216,4 @@
     window.myChart.update();
   }
 </script>
-{% endblock%}
+{% endblock %}

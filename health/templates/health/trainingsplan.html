@@ -1,0 +1,61 @@
+{% extends "dashboard.html" %}
+{% load static %}
+{% block content %}
+<div>
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold tracking-tight mb-0">Trainingsplan</h2>
+    <button class="btn btn-primary rounded-pill px-4"><i class="bi bi-play-fill"></i> Workout starten</button>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-12 col-lg-8">
+      <div class="card mb-4 border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h5 class="fw-bold mb-4">Wochenübersicht (Hypertrophie Phase 2)</h5>
+          <div class="d-flex flex-column gap-3">
+            <div class="d-flex align-items-center p-3 rounded-4 border bg-success bg-opacity-10 border-success">
+              <div class="icon-box bg-success text-white me-3"><i class="bi bi-check-lg"></i></div>
+              <div class="flex-grow-1">
+                <h6 class="mb-0 fw-bold">Montag: Push (Brust, Schulter, Trizeps)</h6>
+                <small class="text-muted">Absolviert in 55 Min.</small>
+              </div>
+            </div>
+            <div class="d-flex align-items-center p-3 rounded-4 border bg-body-tertiary">
+              <div class="icon-box bg-secondary text-white me-3"><i class="bi bi-arrow-right"></i></div>
+              <div class="flex-grow-1">
+                <h6 class="mb-0 fw-bold">Mittwoch: Pull (Rücken, Bizeps)</h6>
+                <small class="text-primary fw-medium">Heute fällig</small>
+              </div>
+              <button class="btn btn-sm btn-outline-primary rounded-pill">Starten</button>
+            </div>
+            <div class="d-flex align-items-center p-3 rounded-4 border border-dashed">
+              <div class="icon-box bg-light text-muted me-3"><i class="bi bi-lock"></i></div>
+              <div class="flex-grow-1">
+                <h6 class="mb-0 text-muted">Freitag: Legs & Core</h6>
+                <small class="text-muted">Geplant</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-lg-4">
+      <div class="card border-0 shadow-sm bg-body-tertiary h-100">
+        <div class="card-body p-4">
+          <h6 class="fw-bold mb-4">Körperdatenbank</h6>
+          <ul class="list-group list-group-flush bg-transparent">
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+              Gewicht <span class="fw-bold">{{ latest_stats.weight_kg|default:"–" }} kg</span>
+            </li>
+            <li class="list-group-item bg-transparent d-flex justify-content-between align-items-center px-0">
+              Körperfett <span class="fw-bold">{{ latest_stats.body_fat_percentage|default:"–" }}%</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

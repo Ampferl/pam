@@ -35,9 +35,11 @@ _registry: list[CalendarSource] = []
 def register(source: CalendarSource) -> None:
     _registry.append(source)
 
-def get_all_items(start: date, end: date, user) -> list[CalendarItem]:
+def get_all_items(start: date, end: date, user, source_keys=None) -> list[CalendarItem]:
     items = []
     for source in _registry:
+        if source_keys is not None and source.key not in source_keys:
+            continue
         items.extend(source.get_items(start, end, user))
     return items
 

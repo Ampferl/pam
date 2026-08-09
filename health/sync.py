@@ -17,7 +17,9 @@ def sync_daily_stats(days_back=7):
         body = client.get_body_composition(day_str) or {}
         sleep = client.get_sleep_data(day_str) or {}
 
-        weight_g = (body.get('totalAverage') or {}).get('weight')
+        total_avg = body.get('totalAverage') or {}
+        weight_g = total_avg.get('weight')
+        body_fat = total_avg.get('bodyFat')
         sleep_seconds = (sleep.get('dailySleepDTO') or {}).get('sleepTimeSeconds')
 
         DailyStats.objects.update_or_create(
@@ -28,6 +30,7 @@ def sync_daily_stats(days_back=7):
                 'resting_heart_rate': stats.get('restingHeartRate'),
                 'sleep_seconds': sleep_seconds,
                 'weight_kg': Decimal(str(weight_g / 1000)) if weight_g else None,
+                'body_fat_percentage': Decimal(str(round(body_fat, 1))) if body_fat else None,
             }
         )
 
