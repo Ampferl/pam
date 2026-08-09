@@ -322,3 +322,37 @@ resize-none {
 .editor-preview table td {
   border-color: var(--border-color) !important;
 }
+
+/* Drag and Drop Visual Feedback */
+.folder-dropzone.drag-over {
+  background-color: rgba(var(--bs-primary-rgb), 0.08) !important;
+  border-radius: var(--radius-sm);
+  outline: 2px dashed var(--bs-primary);
+  outline-offset: -2px;
+}
+
+.tree-node.drag-target-top {
+  border-top: 2px solid var(--bs-primary) !important;
+}
+
+.tree-node.drag-target-bottom {
+  border-bottom: 2px solid var(--bs-primary) !important;
+}
+
+/* Optional: Make the dragged item look translucent */
+.tree-node[draggable="true"].dragging {
+  opacity: 0.4;
+}
+
+/* Ordner-Highlight beim Drag & Drop */
+.tree-node.drag-over-folder > .list-group-item,
+.tree-node.drag-over-folder > div {
+  background-color: rgba(var(--bs-primary-rgb), 0.15) !important;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.15s ease;
+}
+
+.tree-root-dropzone.drag-over-root {
+  background-color: rgba(var(--bs-primary-rgb), 0.05) !important;
+  border-radius: var(--radius-lg);
+}

@@ -50,6 +50,7 @@ class Contact(models.Model):
     email = models.EmailField(blank=True, null=True)
     phone = models.CharField(max_length=50, blank=True, null=True)
     address = models.CharField(max_length=255, blank=True, null=True)
+    birthday = models.DateField(null=True, blank=True)
 
     notes = models.TextField(blank=True)
 
