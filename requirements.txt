@@ -1,2 +1,4 @@
 icalendar
 Django
+garminconnect
+python-dotenv
