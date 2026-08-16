@@ -10,11 +10,9 @@ from django.utils import timezone
 from django.utils.dateparse import parse_date, parse_time
 from django.utils.timezone import make_aware
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
 from core.calendar_sources import get_all_items, get_sources, get_source_subgroups
-from .models import Event, Category, Contact 
-
-
+from .models import Event, Category, Contact , TaskList, TaskGroup, Task
 
 
 @login_required
@@ -283,4 +281,125 @@ def contact_save(request, contact_id=None):
     contact.save()
 
     return redirect('planner:contact', contact_id=contact.id)
+
+#
+# Tasks
+#
+
+def _parse_due(date_str, time_str):
+    if not date_str:
+        return None
+    d = parse_date(date_str)
+    if not d:
+        return None
+    t = parse_time(time_str) if time_str else datetime.min.time()
+    return make_aware(datetime.combine(d, t))
+
+
+@login_required
+def tasklists_view(request):
+    show_archived = request.GET.get('archived') == '1'
+    task_lists = TaskList.objects.filter(is_archived=show_archived).annotate(
+        open_tasks=Count('tasks', filter=Q(tasks__is_done=False))
+    )
+    return render(request, 'planner/tasks/overview.html', {
+        'task_lists': task_lists,
+        'show_archived': show_archived,
+    })
+
+
+@login_required
+def tasklist_detail(request, tasklist_id):
+    task_list = get_object_or_404(TaskList, id=tasklist_id)
+
+    groups = [
+        {'group': group, 'tasks': group.tasks.filter(parent__isnull=True)}
+        for group in task_list.groups.all()
+    ]
+    ungrouped_tasks = task_list.tasks.filter(group__isnull=True, parent__isnull=True)
+
+    return render(request, 'planner/tasks/detail.html', {
+        'task_list': task_list,
+        'groups': groups,
+        'ungrouped_tasks': ungrouped_tasks,
+    })
+
+
+@login_required
+@require_POST
+def tasklist_save(request, tasklist_id=None):
+    if tasklist_id:
+        task_list = get_object_or_404(TaskList, id=tasklist_id)
+        action = request.POST.get('action')
+        if action == 'delete':
+            task_list.delete()
+            return redirect('planner:tasklists')
+        if action == 'archive':
+            task_list.is_archived = True
+            task_list.save()
+            return redirect('planner:tasklists')
+        if action == 'unarchive':
+            task_list.is_archived = False
+            task_list.save()
+            return redirect('planner:tasklists')
+    else:
+        task_list = TaskList()
+
+    task_list.name = request.POST.get('name', '').strip()
+    task_list.description = request.POST.get('description', '')
+    task_list.color_hex = request.POST.get('color_hex') or '#6c757d'
+    task_list.due_date = _parse_due(request.POST.get('due_date'), request.POST.get('due_time'))
+    task_list.save()
+
+    return redirect('planner:tasklist_detail', tasklist_id=task_list.id)
+
+
+@login_required
+@require_POST
+def taskgroup_save(request, tasklist_id, group_id=None):
+    task_list = get_object_or_404(TaskList, id=tasklist_id)
+
+    if group_id:
+        group = get_object_or_404(TaskGroup, id=group_id, task_list=task_list)
+        if request.POST.get('action') == 'delete':
+            group.delete()
+            return redirect('planner:tasklist_detail', tasklist_id=task_list.id)
+    else:
+        group = TaskGroup(task_list=task_list)
+
+    group.name = request.POST.get('name', '').strip()
+    group.due_date = _parse_due(request.POST.get('due_date'), request.POST.get('due_time'))
+    group.save()
+
+    return redirect('planner:tasklist_detail', tasklist_id=task_list.id)
+
+
+@login_required
+@require_POST
+def task_save(request, tasklist_id, task_id=None):
+    task_list = get_object_or_404(TaskList, id=tasklist_id)
+
+    if task_id:
+        task = get_object_or_404(Task, id=task_id, task_list=task_list)
+        action = request.POST.get('action')
+        if action == 'delete':
+            task.delete()
+            return redirect('planner:tasklist_detail', tasklist_id=task_list.id)
+        if action == 'toggle':
+            task.is_done = not task.is_done
+            task.save()
+            return redirect(request.META.get('HTTP_REFERER', reverse('planner:tasklist_detail', args=[task_list.id])))
+    else:
+        task = Task(task_list=task_list)
+        parent_id = request.POST.get('parent_id')
+        task.parent = get_object_or_404(Task, id=parent_id, task_list=task_list) if parent_id else None
+        group_id = request.POST.get('group_id')
+        task.group = get_object_or_404(TaskGroup, id=group_id, task_list=task_list) if group_id else None
+
+    task.title = request.POST.get('title', '').strip()
+    task.description = request.POST.get('description', '')
+    task.due_date = _parse_due(request.POST.get('due_date'), request.POST.get('due_time'))
+    task.save()
+
+    return redirect('planner:tasklist_detail', tasklist_id=task_list.id)
 

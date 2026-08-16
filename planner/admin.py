@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Contact, Category, Event
+from .models import Contact, Category, Event, TaskList, TaskGroup, Task   # replace existing import line
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -25,3 +25,42 @@ class ContactAdmin(admin.ModelAdmin):
     def get_color(self, obj):
         return obj.color
     get_color.short_description = 'Zugewiesene Farbe'
+
+
+class TaskGroupInline(admin.TabularInline):
+    model = TaskGroup
+    extra = 0
+    fields = ('name', 'order', 'due_date')
+
+
+class TaskInline(admin.TabularInline):
+    model = Task
+    fk_name = 'task_list'
+    extra = 0
+    fields = ('title', 'group', 'parent', 'due_date', 'is_done', 'order')
+    autocomplete_fields = ('group', 'parent')
+
+
+@admin.register(TaskList)
+class TaskListAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_archived', 'due_date', 'color_hex')
+    list_filter = ('is_archived',)
+    search_fields = ('name', 'description')
+    readonly_fields = ('created_at', 'updated_at')
+    inlines = [TaskGroupInline, TaskInline]
+
+
+@admin.register(TaskGroup)
+class TaskGroupAdmin(admin.ModelAdmin):
+    list_display = ('name', 'task_list', 'due_date', 'order')
+    list_filter = ('task_list',)
+    search_fields = ('name',)
+
+
+@admin.register(Task)
+class TaskAdmin(admin.ModelAdmin):
+    list_display = ('title', 'task_list', 'group', 'parent', 'due_date', 'is_done')
+    list_filter = ('task_list', 'is_done')
+    search_fields = ('title', 'description')
+    readonly_fields = ('completed_at', 'created_at', 'updated_at')
+    autocomplete_fields = ('group', 'parent')

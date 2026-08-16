@@ -41,16 +41,30 @@
     <div class="col-12 col-xl-4">
       <div class="card h-100">
         <div class="card-body p-4">
-          <h6 class="fw-bold text-muted mb-4"><i class="bi bi-check2-circle me-2"></i> HEUTIGE AUFGABEN</h6>
-          <div class="d-flex align-items-center mb-3 p-2 rounded-3 bg-body-tertiary">
-            <input class="form-check-input me-3 ms-2 fs-5 shadow-none" type="checkbox" checked>
-            <label class="form-check-label flex-grow-1 text-decoration-line-through text-muted">Emails beantworten</label>
+          {% for item in todays_tasks %}
+          <div class="d-flex align-items-center mb-3 p-2 rounded-3 {% if item.pinned %}bg-body-tertiary{% endif %}">
+            {% if item.kind == 'task' %}
+            <form method="POST" action="{{ item.toggle_url }}" class="d-flex align-items-center mb-0 me-3 ms-2">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="toggle">
+              <input class="form-check-input fs-5 shadow-none" type="checkbox" {% if item.is_done %}checked{% endif %} onchange="this.form.submit()">
+            </form>
+            {% else %}
+            <i class="bi {% if item.kind == 'tasklist' %}bi-collection{% else %}bi-folder{% endif %} me-3 ms-2 fs-5" style="color: {{ item.color }};"></i>
+            {% endif %}
+
+            <a href="{{ item.url }}" class="flex-grow-1 text-decoration-none text-reset {% if item.is_done %}text-decoration-line-through text-muted{% endif %}">
+              {% if item.pinned %}<i class="bi bi-pin-angle-fill me-1 text-primary"></i>{% endif %}
+              {{ item.title }}
+            </a>
+
+            {% if item.due_time %}
+            <span class="badge bg-body-tertiary text-muted rounded-pill">{{ item.due_time|time:"H:i" }}</span>
+            {% endif %}
           </div>
-          <div class="d-flex align-items-center mb-3 p-2 rounded-3">
-            <input class="form-check-input me-3 ms-2 fs-5 shadow-none" type="checkbox">
-            <label class="form-check-label flex-grow-1 fw-medium">Budget prüfen</label>
-            <span class="badge bg-danger-subtle text-danger rounded-pill">High</span>
-          </div>
+          {% empty %}
+          <p class="text-muted small mb-0">Keine Aufgaben für heute.</p>
+          {% endfor %}
         </div>
       </div>
     </div>

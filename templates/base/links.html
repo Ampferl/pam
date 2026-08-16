@@ -8,7 +8,7 @@
   <ul class="nav flex-column mb-4 gap-1">
     <li class="nav-item"><a class="nav-link d-flex align-items-center {% nav_active 'planner:overview' %}" href="{% url 'planner:overview' %}"><i class="bi bi-calendar-event me-3 fs-5"></i> Kalender</a></li>
     <li class="nav-item"><a class="nav-link d-flex align-items-center {% nav_active 'planner:contact*' %}" href="{% url 'planner:contacts' %}"><i class="bi bi-file-person-fill me-3 fs-5"></i> Kontakte</a></li>
-    <li class="nav-item"><a class="nav-link d-flex align-items-center" href="javascript:alert('Not implemented yet.')"><i class="bi bi-check2-square me-3 fs-5"></i> Aufgaben</a></li>
+    <li class="nav-item"><a class="nav-link d-flex align-items-center {% nav_active 'planner:task*' %}" href="{% url 'planner:tasklists' %}"><i class="bi bi-check2-square me-3 fs-5"></i> Aufgaben</a></li>
   </ul>
 
   <p class="text-muted small fw-bold text-uppercase mb-2 px-3">Life & Health</p>

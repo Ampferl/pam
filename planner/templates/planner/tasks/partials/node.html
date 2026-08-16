@@ -1,0 +1,59 @@
+<div class="list-group-item border-0 py-2 {% if level == 2 %}ps-4{% elif level == 3 %}ps-5{% elif level >= 4 %}ps-5 ms-3{% endif %}">
+  <div class="d-flex align-items-center gap-2">
+    <form method="POST" action="{% url 'planner:task_update' task_list.id task.id %}" class="d-flex align-items-center mb-0">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="toggle">
+      <input type="checkbox" class="form-check-input mt-0" {% if task.is_done %}checked{% endif %} onchange="this.form.submit()">
+    </form>
+
+    <a class="text-decoration-none text-reset flex-grow-1 {% if task.is_done %}text-muted text-decoration-line-through{% endif %}"
+       data-bs-toggle="collapse" href="#task-edit-{{ task.id }}">
+      {{ task.title }}
+    </a>
+
+    {% if task.due_date %}
+    <small class="text-muted flex-shrink-0"><i class="bi bi-calendar-event me-1"></i>{{ task.due_date|date:"d.m." }}</small>
+    {% endif %}
+
+    <a class="text-muted flex-shrink-0" data-bs-toggle="collapse" href="#task-edit-{{ task.id }}"><i class="bi bi-three-dots"></i></a>
+  </div>
+
+  <div class="collapse mt-2" id="task-edit-{{ task.id }}">
+    <div class="bg-body-tertiary rounded-3 p-3">
+      <form method="POST" action="{% url 'planner:task_update' task_list.id task.id %}" class="mb-3">
+        {% csrf_token %}
+        <div class="mb-2">
+          <input type="text" name="title" value="{{ task.title }}" class="form-control form-control-sm bg-body border-0" required>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <input type="date" name="due_date" value="{{ task.due_date|date:'Y-m-d' }}" class="form-control form-control-sm bg-body border-0">
+          </div>
+          <div class="col-6">
+            <input type="time" name="due_time" value="{{ task.due_date|time:'H:i' }}" class="form-control form-control-sm bg-body border-0">
+          </div>
+        </div>
+        <textarea name="description" class="form-control form-control-sm bg-body border-0 mb-2" rows="2" placeholder="Notizen...">{{ task.description }}</textarea>
+        <div class="d-flex justify-content-between">
+          <button type="submit" name="action" value="delete" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Aufgabe (inkl. Unteraufgaben) löschen?');">Löschen</button>
+          <button type="submit" class="btn btn-sm btn-primary rounded-pill px-3">Speichern</button>
+        </div>
+      </form>
+
+      <form method="POST" action="{% url 'planner:task_create' task_list.id %}" class="d-flex gap-2">
+        {% csrf_token %}
+        <input type="hidden" name="parent_id" value="{{ task.id }}">
+        <input type="text" name="title" class="form-control form-control-sm bg-body border-0" placeholder="Unteraufgabe hinzufügen...">
+        <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3 flex-shrink-0"><i class="bi bi-plus"></i></button>
+      </form>
+    </div>
+  </div>
+
+  {% if task.subtasks.all %}
+  <div class="mt-2">
+    {% for child in task.subtasks.all %}
+      {% include "planner/tasks/partials/node.html" with task=child task_list=task_list level=level|add:1 %}
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>

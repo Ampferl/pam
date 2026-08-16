@@ -1,16 +1,18 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from planner.utils import get_upcoming_events, get_recent_events
+from planner.utils import get_upcoming_events, get_recent_events, get_todays_tasks
 
 
 @login_required
 def index_view(request):
     upcoming = get_upcoming_events(request.user, limit=3)
     recent_activities = get_recent_events(request.user, limit=3, source_keys={'health.activity'})
+    todays_tasks = get_todays_tasks(request.user)
 
     context = {
         'upcoming_events': upcoming,
         'recent_activities': recent_activities,
+        'todays_tasks': todays_tasks,
     }
     return render(request, "core/index.html", context)
 

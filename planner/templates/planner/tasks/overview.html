@@ -1,0 +1,72 @@
+{% extends "dashboard.html" %}
+
+{% block content %}
+<div>
+  <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center mb-4 gap-2">
+    <h2 class="fw-bold tracking-tight mb-0">Aufgabenlisten</h2>
+    <a href="?{% if not show_archived %}archived=1{% endif %}" class="btn btn-outline-secondary rounded-pill px-3">
+      {% if show_archived %}<i class="bi bi-arrow-left me-1"></i> Aktive anzeigen{% else %}<i class="bi bi-archive me-1"></i> Archiv{% endif %}
+    </a>
+  </div>
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body p-4">
+      <h6 class="fw-bold mb-3">Neue Aufgabenliste</h6>
+      <form method="POST" action="{% url 'planner:tasklist_create' %}" class="row g-3 align-items-end">
+        {% csrf_token %}
+        <div class="col-12 col-md-4">
+          <label class="form-label text-muted small fw-bold">NAME</label>
+          <input type="text" name="name" class="form-control bg-body-tertiary border-0" required>
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label text-muted small fw-bold">FARBE</label>
+          <input type="color" name="color_hex" value="#6c757d" class="form-control form-control-color bg-body-tertiary border-0 w-100">
+        </div>
+        <div class="col-6 col-md-3">
+          <label class="form-label text-muted small fw-bold">FÄLLIG AM</label>
+          <input type="date" name="due_date" class="form-control bg-body-tertiary border-0">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label text-muted small fw-bold">UHRZEIT</label>
+          <input type="time" name="due_time" class="form-control bg-body-tertiary border-0">
+        </div>
+        <div class="col-6 col-md-1 d-grid">
+          <button type="submit" class="btn btn-primary rounded-pill"><i class="bi bi-plus-lg"></i></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {% for task_list in task_lists %}
+    <div class="col-12 col-sm-6 col-lg-4">
+      <a href="{% url 'planner:tasklist_detail' task_list.id %}" class="text-decoration-nonetext-reset">
+        <div class="card border-0 shadow-sm h-100 card-hover">
+          <div class="card-body p-4">
+            <div class="d-flex align-items-center gap-2 mb-2">
+              <span class="d-inline-block rounded-circle"style="width:10px;height:10px;background-color:{{ task_list.color_hex }};"></span>
+              <h5 class="fw-bold mb-0">{{ task_list.name }}</h5>
+            </div>
+            {% if task_list.description %}
+            <p class="text-muted small mb-3">{{ task_list.description|truncatechars:80 }}</p>
+            {% endif %}
+            <div class="d-flex justify-content-between align-items-center">
+              <small class="text-muted">{{ task_list.open_tasks }} offen</small>
+              {% if task_list.due_date %}
+              <small class="text-muted"><i class="bi bi-calendar-event me-1"></i>{{task_list.due_date|date:"d.m.Y" }}</small>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% empty %}
+    <div class="col-12">
+      <div class="text-center text-muted py-5">
+        <small>{% if show_archived %}Keine archivierten Listen.{% else %}Noch keine Aufgabenlistenangelegt.{% endif %}</small>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

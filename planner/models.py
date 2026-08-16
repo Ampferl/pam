@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 
 class Category(models.Model):
@@ -80,3 +81,86 @@ class Contact(models.Model):
         last = self.last_name[0].upper() if self.last_name else ''
         return f"{first}{last}"
 
+
+# Tasks
+class TaskList(models.Model):
+    name = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    color_hex = models.CharField(max_length=7, default='#6c757d', help_text='Hex Farb Code.')
+    due_date = models.DateTimeField(null=True, blank=True)
+    is_archived = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Aufgabenliste'
+        verbose_name_plural = 'Aufgabenlisten'
+        ordering = ['is_archived', '-created_at']
+
+    def __str__(self):
+        return self.name
+
+class TaskGroup(models.Model):
+    task_list = models.ForeignKey(TaskList, on_delete=models.CASCADE, related_name='groups')
+    name = models.CharField(max_length=255)
+    order = models.PositiveIntegerField(default=0)
+    due_date = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Aufgabengruppe'
+        verbose_name_plural = 'Aufgabengruppen'
+        ordering = ['order', 'created_at']
+
+    def __str__(self):
+        return f"{self.task_list.name} / {self.name}"
+
+class Task(models.Model):
+    task_list = models.ForeignKey(TaskList, on_delete=models.CASCADE, related_name='tasks')
+    group = models.ForeignKey(TaskGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subtasks')
+
+    title = models.CharField(max_length=255)
+    description = models.TextField(blank=True)
+    due_date = models.DateTimeField(null=True, blank=True)
+    is_done = models.BooleanField(default=False)
+    completed_at = models.DateTimeField(null=True, blank=True)
+    order = models.PositiveIntegerField(default=0)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Aufgabe'
+        verbose_name_plural = 'Aufgaben'
+        ordering = ['order', 'created_at']
+
+    def __str__(self):
+        return self.title
+
+    def clean(self):
+        super().clean()
+        if self.parent_id:
+            if self.parent_id == self.id:
+                raise ValidationError("Eine Aufgabe kann nicht ihre eigene Unteraufgabe sein.")
+            if self.parent.task_list_id != self.task_list_id:
+                raise ValidationError("Unteraufgaben müssen zur selben Aufgabenliste gehören wie die übergeordnete Aufgabe.")
+        if self.group_id and self.group.task_list_id != self.task_list_id:
+            raise ValidationError("Die Gruppe muss zur selben Aufgabenliste gehören wie die Aufgabe.")
+
+    def save(self, *args, **kwargs):
+        if self.is_done and self.completed_at is None:
+            self.completed_at = timezone.now()
+        elif not self.is_done:
+            self.completed_at = None
+        super().save(*args, **kwargs)
+
+    @property
+    def depth(self):
+        depth = 0
+        node = self
+        while node.parent_id:
+            depth += 1
+            node = node.parent
+        return depth
