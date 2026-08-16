@@ -13,8 +13,8 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Contact)
 class ContactAdmin(admin.ModelAdmin):
-    list_display = ('first_name', 'last_name', 'email', 'phone', 'get_initials', 'get_color')
-    search_fields = ('first_name', 'last_name', 'email', 'company')
+    list_display = ('first_name', 'last_name', 'email', 'phone', 'birthday', 'get_initials', 'get_color')
+    search_fields = ('first_name', 'last_name', 'email')
     readonly_fields = ('created_at', 'updated_at')
     list_filter = ('created_at',)
 

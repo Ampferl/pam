@@ -1,20 +1,27 @@
 
 {% load nav_active %}
 <div class="overflow-y-auto flex-grow-1 pe-2" style="scrollbar-width: thin;">
-  <p class="text-muted small fw-bold text-uppercase mb-2 px-3 mt-2">Core</p>
   <ul class="nav flex-column mb-4 gap-1">
     <li class="nav-item"><a class="nav-link d-flex align-items-center {% nav_active 'core:overview' %}" href="{% url 'core:overview' %}"><i class="bi bi-house me-3 fs-5"></i> Home</a></li>
+  </ul>
+  <p class="text-muted small fw-bold text-uppercase mb-2 px-3">Planner</p>
+  <ul class="nav flex-column mb-4 gap-1">
     <li class="nav-item"><a class="nav-link d-flex align-items-center {% nav_active 'planner:overview' %}" href="{% url 'planner:overview' %}"><i class="bi bi-calendar-event me-3 fs-5"></i> Kalender</a></li>
     <li class="nav-item"><a class="nav-link d-flex align-items-center {% nav_active 'planner:contact*' %}" href="{% url 'planner:contacts' %}"><i class="bi bi-file-person-fill me-3 fs-5"></i> Kontakte</a></li>
-    <li class="nav-item"><a class="nav-link d-flex align-items-center {% nav_active 'knowledge*' %}" href="{% url 'knowledge:overview' %}"><i class="bi bi-journal-text me-3 fs-5"></i> Knowledge Base</a></li>
-    <!--<li class="nav-item"><a class="nav-link d-flex align-items-center" data-view="tasks"><i class="bi bi-check2-square me-3 fs-5"></i> Aufgaben</a></li>-->
-    <li class="nav-item"><a class="nav-link d-flex align-items-center" href="javascript:alert('Not implemented yet.')"><i class="bi bi-archive-fill me-3 fs-5"></i> Dokumente</a></li>
+    <li class="nav-item"><a class="nav-link d-flex align-items-center" href="javascript:alert('Not implemented yet.')"><i class="bi bi-check2-square me-3 fs-5"></i> Aufgaben</a></li>
   </ul>
 
   <p class="text-muted small fw-bold text-uppercase mb-2 px-3">Life & Health</p>
   <ul class="nav flex-column mb-4 gap-1">
     <li class="nav-item"><a class="nav-link d-flex align-items-center {% nav_active 'health*' %}" href="{% url 'health:overview' %}"><i class="bi bi-activity me-3 fs-5"></i> Health</a></li>
   </ul>
+
+  <p class="text-muted small fw-bold text-uppercase mb-2 px-3 mt-2">Apps</p>
+  <ul class="nav flex-column mb-4 gap-1">
+    <li class="nav-item"><a class="nav-link d-flex align-items-center {% nav_active 'knowledge*' %}" href="{% url 'knowledge:overview' %}"><i class="bi bi-journal-text me-3 fs-5"></i> Knowledge Base</a></li>
+    <li class="nav-item"><a class="nav-link d-flex align-items-center" href="javascript:alert('Not implemented yet.')"><i class="bi bi-archive-fill me-3 fs-5"></i> Dokumente</a></li>
+  </ul>
+
 </div>
 
 <div class="mt-auto">
