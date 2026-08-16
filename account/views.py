@@ -1,13 +1,28 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from .models import CalendarFeedToken
+
 
 @login_required
 def settings_view(request):
-    return render(request, "account/settings.html")
+    feed_token, _ = CalendarFeedToken.objects.get_or_create(user=request.user)
+    feed_url = request.build_absolute_uri(reverse('planner:ics_feed', args=[feed_token.token]))
+
+    return render(request, "account/settings.html", {'feed_url': feed_url})
+
+
+@login_required
+@require_POST
+def regenerate_feed_token(request):
+    CalendarFeedToken.objects.filter(user=request.user).delete()
+    CalendarFeedToken.objects.create(user=request.user)
+    return redirect('account:settings')
 
 
 def login_view(request):

@@ -2,7 +2,7 @@ from datetime import timedelta, datetime
 from django.utils import timezone
 from django.urls import reverse
 from core.calendar_sources import get_all_items
-from .models import TaskList, TaskGroup, Task
+from .models import Event, TaskList, TaskGroup, Task
 
 
 GERMAN_MONTHS_SHORT = [
@@ -125,4 +125,14 @@ def get_todays_tasks(user, pinned_tasklist_ids=None):
     items.sort(key=lambda i: (not i['pinned'], i['due_time'] or datetime.max.time()))
     return items
 
+
+def get_open_tasks_count():
+    return Task.objects.filter(is_done=False, task_list__is_archived=False).count()
+
+
+def get_events_this_week_count():
+    today = timezone.localdate()
+    week_start = today - timedelta(days=today.weekday())
+    week_end = week_start + timedelta(days=6)
+    return Event.objects.filter(start_time__date__lte=week_end, end_time__date__gte=week_start).count()
 

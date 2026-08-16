@@ -90,6 +90,23 @@
 
       <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
+          <h5 class="fw-bold mb-2">Kalender-Feed (ICS)</h5>
+          <p class="text-muted small mb-3">Dieser Link kann in externen Kalender-Apps als Abo hinterlegt werden. Wer den Link kennt, kann deinen Kalender lesen (bei Verdacht auf Missbrauch einfach neu generieren).</p>
+          <div class="input-group mb-3">
+            <input type="text" id="feedUrlInput" class="form-control bg-body-tertiary border-0" value="{{ feed_url }}" readonly onclick="this.select()">
+            <button class="btn btn-outline-secondary" type="button" onclick="navigator.clipboard.writeText(document.getElementById('feedUrlInput').value)">
+              <i class="bi bi-clipboard me-1"></i> Kopieren
+            </button>
+          </div>
+          <form method="POST" action="{% url 'account:regenerate_feed_token' %}" onsubmit="return confirm('Neuen Link generieren? Der alte Link funktioniert danach nicht mehr.');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">Link neu generieren</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
           <h5 class="fw-bold mb-4">PAM Management</h5>
           <ul>
             <li><a href="{% url 'core:management_overview' %}">Feature Toggles</a></li>

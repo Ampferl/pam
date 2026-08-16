@@ -7,7 +7,7 @@ urlpatterns = [
     path('event/create/', views.event_create, name='event_create'),
     path('event/<int:event_id>/', views.event_detail, name='event_detail'),
 
-    path('feed/', views.event_ics_feed, name='ics_feed'),
+    path('feed/<str:token>/', views.event_ics_feed, name='ics_feed'),
 
     path('contacts/', views.contacts_view, name='contacts'),
     path('contacts/<int:contact_id>', views.contacts_view, name='contact'),

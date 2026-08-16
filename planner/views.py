@@ -13,6 +13,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q, Count
 from core.calendar_sources import get_all_items, get_sources, get_source_subgroups
 from .models import Event, Category, Contact , TaskList, TaskGroup, Task
+from account.models import CalendarFeedToken
 
 
 @login_required
@@ -186,9 +187,9 @@ def event_detail(request, event_id):
     })
 
 
-# TODO: Add a unique UUID token to the feed as identifer to secure access
-@login_required
-def event_ics_feed(request):
+def event_ics_feed(request, token):
+    feed_token = get_object_or_404(CalendarFeedToken, token=token)
+
     cal = Calendar()
     cal.add('prodid', '-//PAM//Alle Events//')
     cal.add('version', '2.0')
@@ -200,7 +201,7 @@ def event_ics_feed(request):
     start_date = today - timedelta(days=365)
     end_date = today + timedelta(days=730)
 
-    items = get_all_items(start_date, end_date, request.user)
+    items = get_all_items(start_date, end_date, feed_token.user)
 
     for item in items:
         ical_event = IcalEvent()

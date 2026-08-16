@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from planner.utils import get_upcoming_events, get_recent_events, get_todays_tasks
+from planner.utils import get_upcoming_events, get_recent_events, get_todays_tasks, get_open_tasks_count, get_events_this_week_count
 
 
 @login_required
@@ -13,6 +13,8 @@ def index_view(request):
         'upcoming_events': upcoming,
         'recent_activities': recent_activities,
         'todays_tasks': todays_tasks,
+        'open_tasks_count': get_open_tasks_count(),
+        'events_this_week_count': get_events_this_week_count(),
     }
     return render(request, "core/index.html", context)
 
