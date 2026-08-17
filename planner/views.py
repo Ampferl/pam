@@ -16,6 +16,48 @@ from .models import Event, Category, Contact , TaskList, TaskGroup, Task
 from account.models import CalendarFeedToken
 
 
+def _layout_day_events(entries):
+    entries = sorted(entries, key=lambda e: (e['top_px'], -e['height_px']))
+
+    columns = []
+    cluster = []
+    cluster_end = None
+
+    def pack(cluster_entries, cluster_columns):
+        col_count = len(cluster_columns)
+        for entry in cluster_entries:
+            entry['col_count'] = col_count
+
+    for entry in entries:
+        start = entry['top_px']
+        end = entry['top_px'] + entry['height_px']
+
+        if cluster_end is not None and start >= cluster_end:
+            pack(cluster, columns)
+            columns = []
+            cluster = []
+            cluster_end = None
+
+        placed = False
+        for col_index, col in enumerate(columns):
+            if col[-1]['top_px'] + col[-1]['height_px'] <= start:
+                col.append(entry)
+                entry['col_index'] = col_index
+                placed = True
+                break
+        if not placed:
+            entry['col_index'] = len(columns)
+            columns.append([entry])
+
+        cluster.append(entry)
+        cluster_end = end if cluster_end is None else max(cluster_end, end)
+
+    if cluster:
+        pack(cluster, columns)
+
+    return entries
+
+
 @login_required
 def index_view(request):
     # 1. Determine target date and active view
@@ -58,19 +100,49 @@ def index_view(request):
 
     items = get_all_items(start_date, end_date, request.user)
 
+    MINUTES_PER_DAY = 24 * 60
+
     events_by_date = {day: [] for day in month_days}
     allday_by_date = {day: [] for day in month_days}
     for item in items:
-        if item.date not in events_by_date:
-            continue
-        if item.all_day:
-            allday_by_date[item.date].append(item)
-        else:
-            start_minutes = item.start_time.hour * 60 + item.start_time.minute
-            end_minutes = item.end_time.hour * 60 + item.end_time.minute if item.end_time else start_minutes + 30
+        item_end_date = item.end_date or item.date
+        span_days = [item.date + timedelta(days=n) for n in range((item_end_date - item.date).days + 1)]
+        is_multi_day = len(span_days) > 1
 
-            height = max(end_minutes - start_minutes, 20)
-            events_by_date[item.date].append({'item': item, 'top_px': start_minutes, 'height_px': height})
+        for day in span_days:
+            if day not in events_by_date:
+                continue
+
+            is_span_start = day == item.date
+            is_span_end = day == item_end_date
+
+            if item.all_day:
+                allday_by_date[day].append({
+                    'item': item, 'is_multi_day': is_multi_day,
+                    'is_span_start': is_span_start, 'is_span_end': is_span_end,
+                })
+            else:
+                if is_span_start and is_span_end:
+                    start_minutes = item.start_time.hour * 60 + item.start_time.minute
+                    end_minutes = item.end_time.hour * 60 + item.end_time.minute if item.end_time else start_minutes + 30
+                elif is_span_start:
+                    start_minutes = item.start_time.hour * 60 + item.start_time.minute
+                    end_minutes = MINUTES_PER_DAY
+                elif is_span_end:
+                    start_minutes = 0
+                    end_minutes = item.end_time.hour * 60 + item.end_time.minute if item.end_time else MINUTES_PER_DAY
+                else:
+                    start_minutes = 0
+                    end_minutes = MINUTES_PER_DAY
+
+                height = max(end_minutes - start_minutes, 20)
+                events_by_date[day].append({
+                    'item': item, 'top_px': start_minutes, 'height_px': height,
+                    'is_multi_day': is_multi_day, 'is_span_start': is_span_start, 'is_span_end': is_span_end,
+                })
+
+    for entries in events_by_date.values():
+        _layout_day_events(entries)
 
     # 5. Build Final Context
     calendar_month_grid = []
@@ -212,10 +284,10 @@ def event_ics_feed(request, token):
 
         if item.all_day:
             ical_event.add('dtstart', item.date)
-            ical_event.add('dtend', item.date + timedelta(days=1))
+            ical_event.add('dtend', item.end_date + timedelta(days=1))
         else:
             ical_event.add('dtstart', make_aware(datetime.combine(item.date, item.start_time)))
-            ical_event.add('dtend', make_aware(datetime.combine(item.date, item.end_time or item.start_time)))
+            ical_event.add('dtend', make_aware(datetime.combine(item.end_date, item.end_time or item.start_time)))
 
         ical_event.add('dtstamp', timezone.now())
         ical_event.add('uid', f'{item.source_key}-{item.url}-{item.date.isoformat()}@ampferl.com')

@@ -17,7 +17,7 @@
 .mock-event-2 { top: 400px; height: 150px; } /* Startet 4h nach 08:00 (12:00), Dauer 1.5h */
 
 .cal-event-abs {
-  position: absolute; left: 4px; right: 4px; padding: 4px 8px; border-radius: 6px;
+  position: absolute; padding: 4px 8px; border-radius: 6px;
   font-size: 0.75rem; font-weight: 600; overflow: hidden; z-index: 10;
   background-color: rgba(var(--bs-primary-rgb), 0.1);
   color: var(--bs-primary); border-left: 3px solid var(--bs-primary);
@@ -31,12 +31,6 @@
   .cal-event-abs { font-size: 0.65rem; padding: 2px 4px; }
 }
 
-.cal-event-abs {
-  position: absolute; left: 4px; right: 4px; padding: 4px 8px; border-radius: 6px;
-  font-size: 0.75rem; font-weight: 600; overflow: hidden; z-index: 10;
-  background-color: rgba(var(--bs-primary-rgb), 0.1);
-  color: var(--bs-primary); border-left: 3px solid var(--bs-primary);
-}
 
 /* Modal Helper Classes */
 .modal-wrapper { max-width: 600px; width: 100%; margin-left: auto; margin-right: auto; }

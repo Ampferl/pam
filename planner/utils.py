@@ -41,7 +41,7 @@ def get_upcoming_events(user, limit=3, source_keys=None, subgroup_keys=None):
     upcoming = []
     for item in items:
         end_time = item.end_time or item.start_time or datetime.max.time()
-        item_end = timezone.make_aware(datetime.combine(item.date, end_time))
+        item_end = timezone.make_aware(datetime.combine(item.end_date, end_time))
         if item_end >= now:
             upcoming.append(item)
 

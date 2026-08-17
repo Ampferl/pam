@@ -8,6 +8,7 @@ class CalendarItem:
     title: str
     date: date
     all_day: bool = True
+    end_date: Optional[date] = None
     start_time: Optional[time] = None
     end_time: Optional[time] = None
     color: str = '#6c757d'
@@ -15,6 +16,10 @@ class CalendarItem:
     source_key: str = ''
     subgroup_key: str = ''
     description: str = ''
+
+    def __post_init__(self):
+        if self.end_date is None:
+            self.end_date = self.date
 
 
 @dataclass

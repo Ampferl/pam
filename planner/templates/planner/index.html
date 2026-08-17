@@ -90,21 +90,31 @@
             {{ day_data.date.day }}
           </a>
 
-          {% for item in day_data.allday_events %}
-          <div class="cal-event cal-event-allday mt-1 px-1 rounded text-truncate small"
+          {% for entry in day_data.allday_events %}
+          {% with item=entry.item %}
+          <div class="cal-event cal-event-allday mt-1 px-1 rounded text-truncate small
+                      {% if entry.is_multi_day and not entry.is_span_start %}rounded-start-0{% endif %}
+                      {% if entry.is_multi_day and not entry.is_span_end %}rounded-end-0{% endif %}"
                data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
                                                    style="background-color: {{ item.color|default:'#0d6efd' }}; color:#fff;"
                                                    onclick="window.location='{{ item.url }}'">
+            {% if entry.is_multi_day and not entry.is_span_start %}<i class="bi bi-chevron-left"></i>{% endif %}
             {{ item.title }}
+            {% if entry.is_multi_day and not entry.is_span_end %}<i class="bi bi-chevron-right"></i>{% endif %}
           </div>
+          {% endwith %}
           {% endfor %}
           {% for entry in day_data.events %}
           {% with item=entry.item %}
-          <div class="cal-event mt-1 px-1 rounded text-truncate small"
+          <div class="cal-event mt-1 px-1 rounded text-truncate small
+                      {% if entry.is_multi_day and not entry.is_span_start %}rounded-start-0{% endif %}
+                      {% if entry.is_multi_day and not entry.is_span_end %}rounded-end-0{% endif %}"
                data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
                                                    style="background-color: {{ item.color|default:'#0d6efd' }}; color: #fff; cursor:pointer;"
                                                    onclick="window.location='{{ item.url }}'">
-            {{ item.start_time|date:"H:i" }} {{ item.title }}
+            {% if entry.is_multi_day and not entry.is_span_start %}<i class="bi bi-chevron-left"></i>{% else %}{{ item.start_time|date:"H:i" }}{% endif %}
+            {{ item.title }}
+            {% if entry.is_multi_day and not entry.is_span_end %}<i class="bi bi-chevron-right"></i>{% endif %}
           </div>
           {% endwith %}
           {% endfor %}
@@ -131,13 +141,17 @@
           <div class="w-50px"></div>
           {% for day_data in calendar_week_grid %}
           <div class="flex-grow-1 px-1">
-            {% for item in day_data.allday_events %}
-            <div class="cal-event-allday rounded text-truncate small px-1 mb-1"
+            {% for entry in day_data.allday_events %}
+            {% with item=entry.item %}
+            <div class="cal-event-allday rounded text-truncate small px-1 mb-1
+                        {% if entry.is_multi_day and not entry.is_span_start %}rounded-start-0{% endif %}
+                        {% if entry.is_multi_day and not entry.is_span_end %}rounded-end-0{% endif %}"
                  data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
                                                      style="background-color: {{ item.color|default:'#0d6efd' }}; color: #fff; cursor:pointer;"
                                                      onclick="window.location='{{ item.url }}'">
               {{ item.title }}
             </div>
+            {% endwith %}
             {% endfor %}
           </div>
           {% endfor %}
@@ -167,12 +181,23 @@
 
             {% for entry in day_data.events %}
             {% with item=entry.item %}
-            <div class="cal-event-abs position-absolute w-100 rounded p-1 text-white overflow-hidden shadow-sm"
-                 data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
-                                                     style="top: {{ entry.top_px }}px; height: {{ entry.height_px }}px; background-color: {{ item.color|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
-                                                     onclick="window.location='{{ item.url }}'">
+            <div class="cal-event-abs position-absolute rounded p-1 text-white overflow-hidden shadow-sm
+                          {% if entry.is_multi_day and not entry.is_span_start %}rounded-top-0{% endif %}
+                          {% if entry.is_multi_day and not entry.is_span_end %}rounded-bottom-0{% endif %}"
+                   data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
+                                                       style="top: {{ entry.top_px }}px; height: {{ entry.height_px }}px;
+                                                              left: calc(16px + (100% - 16px) * {{ entry.col_index }} / {{ entry.col_count }} + 2px);
+                                                              width: calc((100% - 16px) / {{ entry.col_count }} - 4px);
+                                                              background-color: {{ item.color|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
+                                                       onclick="window.location='{{ item.url }}'">
+              {% if entry.is_multi_day and not entry.is_span_start %}<i class="bi bi-chevron-up small"></i>{% endif %}
               <strong class="d-block small lh-1">{{ item.title }}</strong>
+              {% if not entry.is_multi_day or entry.is_span_start %}
               <span class="small pointer-events-none time-label">{{ item.start_time|date:"H:i" }}</span>
+              {% elif entry.is_span_end %}
+              <span class="small pointer-events-none time-label">bis {{ item.end_time|date:"H:i" }}</span>
+              {% endif %}
+              {% if entry.is_multi_day and not entry.is_span_end %}<i class="bi bi-chevron-down small"></i>{% endif %}
             </div>
             {% endwith %}
             {% endfor %}
@@ -184,13 +209,15 @@
 
     <div id="cal-view-day" class="{% if active_view == 'day' %}d-block{% else %}d-none{% endif %}">
       <div class="border-bottom border-secondary-subtle pb-2 mb-2">
-        {% for item in day_allday_events %}
+        {% for entry in day_allday_events %}
+        {% with item=entry.item %}
         <div class="cal-event-allday rounded text-truncate small px-2 py-1 mb-1 d-inline-block me-1"
              data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
                                                  style="background-color: {{ item.color|default:'#0d6efd' }}; color: #fff; cursor: pointer;"
                                                  onclick="window.location='{{ item.url }}'">
           {{ item.title }}
         </div>
+        {% endwith %}
         {% endfor %}
       </div>
       <div class="d-flex position-relative border-top border-secondary-subtle mt-3">
@@ -216,13 +243,26 @@
 
           {% for entry in day_events %}
           {% with item=entry.item %}
-          <div class="cal-event-abs position-absolute w-100 rounded p-2 text-white overflow-hidden shadow-sm"
-               data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
-                                                   style="top: {{ entry.top_px }}px; height: {{ entry.height_px }}px; background-color: {{item.color|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
-                                                   onclick="window.location='{{ item.url }}'">
+          <div class="cal-event-abs position-absolute rounded p-2 text-white overflow-hidden shadow-sm
+                        {% if entry.is_multi_day and not entry.is_span_start %}rounded-top-0{% endif %}
+                        {% if entry.is_multi_day and not entry.is_span_end %}rounded-bottom-0{% endif %}"
+                 data-source="{{ item.source_key }}" data-subgroup="{{ item.subgroup_key }}"
+                                                     style="top: {{ entry.top_px }}px; height: {{ entry.height_px }}px;
+                                                            left: calc(16px + (100% - 16px) * {{ entry.col_index }} / {{ entry.col_count }} + 2px);
+                                                            width: calc((100% - 16px) / {{ entry.col_count }} - 4px);
+                                                            background-color: {{item.color|default:'#0d6efd' }}; opacity: 0.9; z-index: 10;"
+                                                     onclick="window.location='{{ item.url }}'">
+            {% if entry.is_multi_day and not entry.is_span_start %}<i class="bi bi-chevron-up small"></i>{% endif %}
             <strong class="d-block">{{ item.title }}</strong>
-            <span class="small pointer-events-none time-label">{{ item.start_time|date:"H:i" }} - {{ item.end_time|date:"H:i" }}</span><br>
+            <span class="small pointer-events-none time-label">
+              {% if entry.is_multi_day %}
+                {% if entry.is_span_start %}ab {{ item.start_time|date:"H:i" }}{% elif entry.is_span_end %}bis {{ item.end_time|date:"H:i" }}{% else %}Ganztägig{% endif %}
+              {% else %}
+                {{ item.start_time|date:"H:i" }} - {{ item.end_time|date:"H:i" }}
+              {% endif %}
+            </span><br>
             <span class="small opacity-75">{{ item.description }}</span>
+            {% if entry.is_multi_day and not entry.is_span_end %}<i class="bi bi-chevron-down small"></i>{% endif %}
           </div>
           {% endwith %}
           {% endfor %}

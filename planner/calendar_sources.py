@@ -10,7 +10,7 @@ class EventSource:
         qs = Event.objects.filter(start_time__date__lte=end, end_time__date__gte=start).select_related('category')
         return [
             CalendarItem(
-                title=e.title, date=e.start_time.date(), all_day=False,
+                title=e.title, date=e.start_time.date(), end_date=e.end_time.date(), all_day=False,
                 start_time=e.start_time.time(), end_time=e.end_time.time(),
                 color=e.category.color_hex if e.category else "#0d6efd",
                 url=reverse('planner:event_detail', args=[e.id]), source_key=self.key,
